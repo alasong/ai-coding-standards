@@ -52,5 +52,6 @@ L3 → L4：L3 运行 3 个月，自主成功率 > 85%，审计通过率 > 95%
 | 03 | [多 Agent 与多平台](03-multi-agent-multi-surface.md) | Sub-Agents、Agent SDK、多平台协同、Slack/Channels |
 | 04 | [安全与治理](04-security-governance.md) | 企业部署、权限管理、MCP 安全、合规、审计 |
 | 05 | [工具参考](05-tool-reference.md) | CLI 参考、Settings、Hooks、Skills、配置模板 |
+| 07 | [反幻觉方案](07-anti-hallucination.md) | 证据链方法论、40 种幻觉类型、检测与防护方案 |
 | - | [v4 vs v5 变更](CHANGELOG.md) | 从 v4 到 v5 的变更说明 |
 | - | [冲突解决记录](CONFLICT-RESOLUTION.md) | v4 与 auto-coding 冲突的解决（12 个冲突，全部已解决） |
