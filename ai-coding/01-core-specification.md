@@ -154,6 +154,35 @@ P12 要求**声明式环境管理**，但不同语言的工具链特征不同，
 - CI 验证：`make check-env`（检测 go、golangci-lint 是否可用）
 - Docker 角色：部署验证工具，不是日常开发环境
 
+### 1.6.2 Docker 容器调试策略
+
+Docker 容器作为**部署验证环境**，AI 必须能够独立完成诊断和修复。核心原则：
+
+**诊断先于修改**：Docker build/runtime 失败时，必须先通过日志和状态定位根因，不得猜测修改 Dockerfile。
+
+**Go 项目 Docker 调试标准**：
+
+| 诊断目标 | 命令 | 说明 |
+|---------|------|------|
+| 查看详细构建 | `make docker-build-verbose` | `--progress=plain --no-cache` 显示每步完整输出 |
+| 查看日志 | `make docker-logs` | 最近 100 行日志 |
+| 进入容器 | `make docker-sh` | 在运行中的容器内执行 shell |
+| 检查状态 | `docker compose ps` | 容器状态、健康检查、端口映射 |
+| 验证配置 | `docker compose config` | 检查 docker-compose.yml 是否有效 |
+
+**AI 调试流程（Build 失败时）**：
+1. `make docker-build-verbose` → 查看哪一步 Step 失败
+2. 如果 Step 是 `COPY` → 检查源文件路径是否存在，是否被 `.dockerignore` 排除
+3. 如果 Step 是 `RUN go mod download` → 检查网络代理/GOPROXY，不要改 go.mod
+4. 如果 Step 是 `RUN go build` → 先本地 `make build` 确认不是代码问题
+
+**AI 调试流程（Runtime 失败时）**：
+1. `make docker-logs` → 查看容器启动日志
+2. `docker compose ps` → 确认容器状态（running / restarting / exited）
+3. `make docker-sh` → 进入容器确认二进制文件在 `/app/skillmesh`
+4. 检查 HTTP：`docker compose exec skillmesh wget -qO- http://localhost:8080/health`
+5. 检查 DB：`docker compose exec postgres pg_isready -U skillmesh`
+
 ### 1.7 多层执行机制（Layered Enforcement）
 
 P12-P22 不是靠 AI 自觉执行，而是通过以下四层机制自动拦截：
