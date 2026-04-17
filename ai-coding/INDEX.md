@@ -1,8 +1,8 @@
-# AI Coding 规范 v5.0：安全优先的 Auto-Coding
+# AI Coding 规范 v5.2：安全优先的 Auto-Coding
 
-> 版本：v5.0 | 2026-04-14
+> 版本：v5.2 | 2026-04-17
 > 适用：1-3 人小团队 / auto-coding 模式
-> 核心原则：**v4 的安全边界不动摇，auto-coding 在安全边界内最大化自主性**
+> 核心原则：v4 的安全边界不动摇，auto-coding 在安全边界内最大化自主性，P23 方案设计驱动编码全流程
 
 ---
 
@@ -28,6 +28,7 @@
 | **最小批量（P8）** | 强制 | 强制 | 强制 | 强制 |
 | **Prompt 版本化（P9）** | 强制 | 强制 | 强制 | 自动持久化 |
 | **数据分级（P10）** | 强制 | 强制 | 强制 | 强制 |
+| **P23** | **强制** | **强制** | **强制** | **强制** |
 | **幻觉检测（新增）** | 强制 | 强制 | 强制 | 强制 |
 | **自修复限制** | 最多 3 轮 | 最多 3 轮 | 最多 3 轮 | 最多 3 轮 |
 | **MCP 访问** | 只读 | 读写（过滤） | 读写（过滤+脱敏） | 读写（过滤+脱敏+审计） |
@@ -47,11 +48,12 @@ L3 → L4：L3 运行 3 个月，自主成功率 > 85%，审计通过率 > 95%
 
 | # | 文档 | 说明 |
 |---|------|------|
-| 01 | [核心规范](01-core-specification.md) | 核心原则、自治等级、TDD、Spec 驱动、Prompt 管理、幻觉检测 |
+| 01 | [核心规范](01-core-specification.md) | 核心原则、自治等级、TDD、Spec 驱动、Prompt 管理、幻觉检测、方案设计链（P23） |
 | 02 | [Auto-Coding 实践](02-auto-coding-practices.md) | 自主编码模式、定时任务、夜间开发、自修复 CI、Supervisor-Worker |
 | 03 | [多 Agent 与多平台](03-multi-agent-multi-surface.md) | Sub-Agents、Agent SDK、多平台协同、Slack/Channels |
 | 04 | [安全与治理](04-security-governance.md) | 企业部署、权限管理、MCP 安全、合规、审计 |
 | 05 | [工具参考](05-tool-reference.md) | CLI 参考、Settings、Hooks、Skills、配置模板 |
 | 07 | [反幻觉方案](07-anti-hallucination.md) | 证据链方法论、40 种幻觉类型、检测与防护方案 |
+| 08 | [能力差距分析](08-capability-gap-analysis.md) | AI 能力差距分析、技能评估、培训路径 |
 | - | [v4 vs v5 变更](CHANGELOG.md) | 从 v4 到 v5 的变更说明 |
 | - | [冲突解决记录](CONFLICT-RESOLUTION.md) | v4 与 auto-coding 冲突的解决（12 个冲突，全部已解决） |

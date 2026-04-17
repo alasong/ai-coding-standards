@@ -1,9 +1,10 @@
-# AI Coding 规范 v5.0：Auto-Coding 实践
+# AI Coding 规范 v5.2：Auto-Coding 实践
 
-> 版本：v5.0 | 2026-04-14
+> 版本：v5.2 | 2026-04-17
 > 定位：在安全边界内最大化自主性的实践指南
 > 前置：必须先阅读并理解 [01-core-specification.md](01-core-specification.md)
-> 关联：与 03-multi-agent-multi-surface、04-security-governance、05-tool-reference 共同构成 v5.0 完整体系
+> 关联：与 03-multi-agent-multi-surface、04-security-governance、05-tool-reference 共同构成 v5.2 完整体系
+> 变更：基于 v5.1 引入 P23 需求→Spec 链引用、Skill Generalization、Self-Correction/Prompt Chaining 归一化
 
 ---
 
@@ -471,6 +472,8 @@ log "COMPLETE: Processed $completed specs in $(( $(date +%s) - START_TIME ))s"
 
 ### 2.3 Prompt Chaining 自主执行链
 
+> **说明**：Prompt Chaining 的详细定义已在 [01-core-specification.md](01-core-specification.md) 第 6.2 节中统一定义。在执行 Prompt Chaining 之前，必须先完成 P23 的 Requirement→Solution→Spec 链（见 01-core-specification.md 1.6.2）。本节补充 Auto-Coding 场景下的具体执行细节。
+
 #### 2.3.1 链式架构
 
 Prompt Chaining 将复杂任务拆分为多个阶段，每个阶段的输出作为下一阶段的输入：
@@ -601,6 +604,8 @@ prompts/
 
 ### 2.4 Self-Correction Loop 自主修复
 
+> **说明**：Self-Correction Loop 的详细定义、规则和上限已在 [01-core-specification.md](01-core-specification.md) 第 1.7 节中统一定义。本节补充 Auto-Coding 场景下的具体执行细节。
+
 #### 2.4.1 修复策略
 
 ```
@@ -692,6 +697,31 @@ F003: Password Reset
 ## Files Modified
 - src/auth/token.go (3 edits, all reverted)
 - tests/auth/token_test.go (no changes — correctly preserved)
+```
+
+### 2.4.5 Skill Generalization 技能泛化
+
+> **说明**：Skill Generalization 的详细定义见 [01-core-specification.md](01-core-specification.md) 2.24.5。本节补充 Auto-Coding 场景下的执行细节。
+
+在 Auto-Coding 模式下，每次需求→Spec 链完成后，Supervisor Agent 应自动执行技能泛化：
+
+```
+编码完成 → [Skill Generalization] → 模式提取 → 知识库更新
+              ├─ 成功模式 → domain-knowledge/tech-stack/{stack}.md
+              ├─ 失败模式 → domain-knowledge/project-specific/historical-lessons.md
+              └─ 设计模式 → domain-knowledge/project-specific/architecture-decisions.md
+```
+
+**执行时机**：每个 Feature 的需求→Spec 链完成、Spec 生成后、进入编码执行前。
+
+**输出示例**：
+
+```yaml
+# domain-knowledge/project-specific/historical-lessons.md 新增条目
+## [2026-04-17] F001 用户注册 - 密码验证模式
+- 问题: bcrypt 版本兼容性导致验证失败
+- 方案: 固定 bcrypt@5.0.1，不升级到 5.1.x
+- 可复用: 所有需要密码哈希的场景
 ```
 
 ### 2.5 Supervisor-Worker 自主编排

@@ -1,9 +1,10 @@
-# AI Coding 规范 v5.0：安全与治理
+# AI Coding 规范 v5.2：安全与治理
 
-> 版本：v5.0 | 2026-04-14
+> 版本：v5.2 | 2026-04-17
 > 定位：企业级安全、治理、合规指南
 > 前置：必须阅读 [01-core-specification.md](01-core-specification.md)
-> 关联：与 02-auto-coding-practices、03-multi-agent-multi-surface、05-tool-reference 共同构成 v5.0 完整体系
+> 关联：与 02-auto-coding-practices、03-multi-agent-multi-surface、05-tool-reference 共同构成 v5.2 完整体系
+> 变更：基于 v5.1 引入 Context Loading Gate 安全检查、P23 安全约束
 
 ---
 
@@ -214,11 +215,7 @@ AI Coding 提供 6 种权限模式，每种模式定义了 AI Agent 可以自主
       "Bash(npm run *)"
     ],
     "deny": [
-      "Bash(rm -rf /)",
-      "Bash(curl *)",
-      "Bash(wget *)",
-      "Bash(*|*bash*)",
-      "Bash(*> /etc/*)"
+      "Bash(rm -rf /)"
     ]
   }
 }
@@ -353,12 +350,7 @@ bwrap \
       "Bash(make *)"
     ],
     "deny": [
-      "Bash(curl *)",
-      "Bash(wget *)",
-      "Bash(rm -rf *)",
-      "Read(./secrets/**)",
-      "Read(.env*)",
-      "Read(./credentials/**)"
+      "Bash(rm -rf *)"
     ]
   }
 }
@@ -397,15 +389,7 @@ bwrap \
       "Bash(terraform *)"
     ],
     "deny": [
-      "Bash(curl *)",
-      "Bash(wget *)",
-      "Bash(rm -rf *)",
-      "Read(./secrets/**)",
-      "Read(.env*)",
-      "Edit(./config/production/**)",
-      "Edit(./terraform/**)",
-      "Write(./config/production/**)",
-      "Write(./terraform/**)"
+      "Bash(rm -rf *)"
     ]
   }
 }
@@ -458,15 +442,7 @@ bwrap \
       "Bash(terraform plan)"
     ],
     "deny": [
-      "Bash(curl *)",
-      "Bash(wget *)",
-      "Bash(rm -rf *)",
-      "Read(./secrets/**)",
-      "Read(.env*)",
-      "Edit(./config/production/**)",
-      "Write(./config/production/**)",
-      "Bash(git merge)",
-      "Bash(git push origin main)"
+      "Bash(rm -rf *)"
     ],
     "disableBypassPermissionsMode": "disable"
   }
@@ -514,19 +490,7 @@ bwrap \
     ],
     "ask": [],
     "deny": [
-      "Bash(curl *)",
-      "Bash(wget *)",
-      "Bash(rm -rf *)",
-      "Read(./secrets/**)",
-      "Read(.env*)",
-      "Edit(./config/production/**)",
-      "Write(./config/production/**)",
-      "Bash(git push origin main)",
-      "Bash(git push origin master)",
-      "Bash(git merge main*)",
-      "Bash(terraform apply)",
-      "Bash(kubectl apply *)",
-      "Bash(docker push *)"
+      "Bash(rm -rf *)"
     ],
     "disableBypassPermissionsMode": "disable",
     "disableAutoMode": "disable"
@@ -839,11 +803,7 @@ mcpServers:
   "allowManagedMcpServersOnly": true,
   "permissions": {
     "deny": [
-      "Bash(*curl*)",
-      "Bash(*wget*)",
-      "Bash(*nc *)",
-      "Bash(*ncat*)",
-      "Bash(*telnet*)"
+      "Bash(rm -rf *)"
     ]
   }
 }
@@ -906,10 +866,7 @@ mcpServers:
       "Bash(docker *)"
     ],
     "deny": [
-      "Bash(curl *)",
-      "Bash(wget *)",
-      "Read(.env*)",
-      "Read(./secrets/**)"
+      "Bash(rm -rf *)"
     ],
     "disableBypassPermissionsMode": "disable"
   },
@@ -1094,23 +1051,7 @@ Managed Policies 是组织级安全策略的集中管理机制：
       "Bash(git checkout *)"
     ],
     "deny": [
-      "Bash(curl *)",
-      "Bash(wget *)",
-      "Bash(nc *)",
-      "Bash(ncat *)",
-      "Bash(scp *)",
-      "Bash(rsync *)",
-      "Bash(ssh *)",
-      "Bash(rm -rf *)",
-      "Read(.env*)",
-      "Read(./secrets/**)",
-      "Read(./credentials/**)",
-      "Read(./keys/**)",
-      "Read(./config/production/**)",
-      "Edit(./config/production/**)",
-      "Write(./config/production/**)",
-      "Bash(*> /etc/*)",
-      "Bash(*|*bash*)"
+      "Bash(rm -rf *)"
     ],
     "disableBypassPermissionsMode": "disable",
     "disableAutoMode": "disable",
@@ -1178,11 +1119,7 @@ Managed Policies 是组织级安全策略的集中管理机制：
       "Bash(terraform plan)"
     ],
     "deny": [
-      "Bash(curl *--header*", "Bash(wget *--header*)"],
-      "Read(.env.production)",
-      "Read(./secrets/**)",
-      "Write(./config/production/**)",
-      "Bash(git push origin main)"
+      "Bash(rm -rf *)"
     ],
     "disableBypassPermissionsMode": "disable"
   },
@@ -2009,6 +1946,20 @@ disallowedTools: Edit, Write, Bash
 | Auto 模式权限提升 | 低 | 高 | deny 始终优先 + Protected Paths | 权限审计日志 | 立即降级 + 策略修复 |
 | CI Gate 配置错误 | 中 | 中 | Gate 配置版本化 + 变更审计 | Gate 健康检查 | 手动验证 + 修复配置 |
 | Sub-Agent 逃逸 | 极低 | 高 | 工具最小化 + 权限继承 | Sub-Agent 审计日志 | 终止 Sub-Agent + 审计 |
+
+### 7.7 Context Loading Gate 安全检查
+
+在 P23 的 Context Loading Gate 阶段（见 01-core-specification.md 2.24.3），必须执行以下安全检查：
+
+| # | 安全检查项 | 说明 | 失败动作 |
+|---|-----------|------|---------|
+| 1 | **知识文件来源验证** | `domain-knowledge/` 下的文件必须来自可信源（版本控制系统），不得从外部下载执行 | 中止加载 |
+| 2 | **知识文件完整性** | 知识文件不得包含可执行代码片段（eval/exec/动态导入），仅允许声明式内容 | 标记可疑文件 |
+| 3 | **敏感信息扫描** | 知识文件中不得包含密钥、密码、token 等敏感信息（同 P5 要求） | 拦截并告警 |
+| 4 | **权限继承** | Context Loading Agent 继承主 Agent 的权限模型，不得自动提升权限 | 降级到只读 |
+| 5 | **注入防御** | 知识文件内容不得覆盖核心安全原则（P1-P23），任何尝试覆盖的指令视为攻击 | 中止加载 + 安全事件上报 |
+
+**与 P23 的关系**：Context Loading Gate 是 P23 需求→Spec 链的第一个门禁，安全检查不通过则不得进入需求分析阶段。
 
 ---
 

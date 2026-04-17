@@ -1,9 +1,10 @@
-# AI Coding 规范 v5.0：多 Agent 与多平台
+# AI Coding 规范 v5.2：多 Agent 与多平台
 
-> 版本：v5.0 | 2026-04-14
+> 版本：v5.2 | 2026-04-17
 > 定位：多 Agent 架构与全平台协同的实践指南
 > 前置：必须先阅读并理解 [01-core-specification.md](01-core-specification.md) 和 [02-auto-coding-practices.md](02-auto-coding-practices.md)
-> 关联：与 04-security-governance、05-tool-reference 共同构成 v5.0 完整体系
+> 关联：与 04-security-governance、05-tool-reference 共同构成 v5.2 完整体系
+> 变更：基于 v5.1 引入 Generalization Agent、安全描述归一化
 
 ---
 
@@ -313,6 +314,33 @@ model: opus
 ```
 
 **v5 合规要点**：执行 P4 人工审查中的 AI Reviewer 层，检测 AI 特有风险。
+
+#### 模式 E：泛化 Agent（Generalization）
+
+```yaml
+---
+name: generalizer
+description: 技能泛化专家。在完成需求→Spec 链后，提取可复用的设计模式和反模式。
+tools: Read, Grep, Glob, Write
+model: opus
+---
+
+你是技能泛化专家。你的目标是从本次方案设计中提取可复用的知识。
+
+执行流程：
+1. 读取 docs/solutions/{feature-id}-design.md 方案设计文档
+2. 识别使用的设计模式、架构模式、技术决策
+3. 比对 domain-knowledge/ 目录，判断是否为新发现
+4. 将新模式写入对应的知识文件
+5. 将失败方案写入 historical-lessons.md
+
+输出分类：
+- 成功模式 → domain-knowledge/tech-stack/{stack}.md
+- 失败模式 → domain-knowledge/project-specific/historical-lessons.md
+- 架构决策 → domain-knowledge/project-specific/architecture-decisions.md
+```
+
+**v5 合规要点**：支持 P23 的 Skill Generalization 机制（见 01-core-specification.md 2.24.5）。
 
 ### 1.7 Sub-Agent 钩子系统
 
@@ -1875,6 +1903,8 @@ gh pr create \
 ---
 
 ## 第 7 章：安全与治理
+
+> **说明**：本章为多平台场景下的安全与治理摘要。完整的企业级安全架构、权限管理、MCP 安全、合规与审计详见 [04-security-governance.md](04-security-governance.md)。
 
 ### 7.1 多平台下的权限管理
 

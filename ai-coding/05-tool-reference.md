@@ -1,9 +1,10 @@
-# AI Coding 规范 v5.0：工具参考
+# AI Coding 规范 v5.2：工具参考
 
-> 版本：v5.0 | 2026-04-14
+> 版本：v5.2 | 2026-04-17
 > 定位：配置参考、命令速查、模板库、故障排查
 > 前置：必须阅读 01-core-specification.md
 > 数据源：Claude Code 官方文档 (code.claude.com/docs) + 社区实战 + 自动编码专项研究
+> 变更：基于 v5.1 引入 solution-quality-gate.sh、domain-knowledge/ 目录、设计模板
 
 ---
 
@@ -2474,6 +2475,110 @@ Rules:
 3. **避免硬编码密钥**：使用环境变量注入敏感凭证
 4. **命名空间规则**：使用 `mcp__servername__toolname` 格式精细控制工具访问
 5. **定期审计**：通过 ConfigChange 钩子监控 MCP 配置变更
+
+### 6.8 P23 方案设计模板
+
+> **说明**：以下模板支持 P23 Requirement→Solution→Spec 链（见 01-core-specification.md 2.24）。详细模板文件见 `ai-coding/templates/` 目录。
+
+#### 6.8.1 架构设计文档模板
+
+文件路径：`docs/architecture/{feature-id}-architecture.md`
+
+模板见：`templates/architecture-doc.md`
+
+```markdown
+# {Feature名称} 架构适配分析
+
+> 需求来源：{specs/{feature-id}-spec.md}
+> 创建时间：{YYYY-MM-DD}
+> 状态：Draft | Approved | Rejected
+
+## 1. 需求概述
+
+## 2. 现有架构影响分析
+
+## 3. 接口变更
+
+## 4. 数据模型变更
+
+## 5. 依赖变更
+
+## 6. 风险评估
+
+## 7. 决策点 DP0.5 确认
+```
+
+#### 6.8.2 方案设计文档模板
+
+文件路径：`docs/solutions/{feature-id}-design.md`
+
+模板见：`templates/solution-design.md`
+
+```markdown
+# {Feature名称} 方案设计
+
+> 架构分析：{docs/architecture/{feature-id}-architecture.md}
+> 创建时间：{YYYY-MM-DD}
+> 状态：Draft | Approved | Rejected
+
+## 1. 方案概述
+
+## 2. 模块划分
+
+## 3. 接口定义
+
+## 4. 数据流设计
+
+## 5. 异常处理策略
+
+## 6. 测试策略
+
+## 7. 依赖约束
+
+## 8. 风险评估（Top 3）
+
+## 9. Solution Quality Gate 检查记录
+
+## 10. 决策点 DP0.7 确认
+```
+
+### 6.9 domain-knowledge/ 目录
+
+> **说明**：支持 P23 的 Context Loading Gate（见 01-core-specification.md 2.24.3）。
+
+```
+domain-knowledge/
+├── industry/
+│   ├── fintech.md          # 金融科技领域知识
+│   ├── healthcare.md       # 医疗健康领域知识
+│   └── e-commerce.md       # 电商领域知识
+├── tech-stack/
+│   ├── go-gin.md           # Go + Gin 框架最佳实践
+│   ├── python-fastapi.md   # Python + FastAPI 最佳实践
+│   └── react-typescript.md # React + TypeScript 最佳实践
+└── project-specific/
+    ├── architecture-decisions.md  # 架构决策记录（ADR）
+    ├── naming-conventions.md      # 命名规范
+    └── historical-lessons.md      # 历史教训（失败方案记录）
+```
+
+### 6.10 方案质量门禁脚本
+
+> **说明**：支持 P23 的 Solution Quality Gate（见 01-core-specification.md 2.24.4）。
+
+脚本路径：`ai-coding/scripts/solution-quality-gate.sh`
+
+使用方式：
+
+```bash
+# 在方案设计完成后、Spec 生成前执行
+./ai-coding/scripts/solution-quality-gate.sh \
+  --design docs/solutions/{feature-id}-design.md \
+  --requirements docs/requirements/{feature-id}-requirements.md \
+  --architecture docs/architecture/{feature-id}-architecture.md
+
+# 输出：8 项检查结果，全部通过方可进入 Spec 生成
+```
 
 ---
 
