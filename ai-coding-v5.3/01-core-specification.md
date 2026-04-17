@@ -98,6 +98,33 @@
 | 4 | 现有架构理解 | `docs/architecture/` |
 | 5 | 领域模型 | `docs/domain-model/` |
 
+完整的 `domain-knowledge/` 目录结构：
+
+```
+domain-knowledge/
+├── industry/                      # 行业知识
+│   ├── fintech.md
+│   ├── healthcare.md
+│   └── e-commerce.md
+├── tech-stack/                    # 技术栈知识
+│   ├── go-gin.md
+│   ├── python-fastapi.md
+│   └── react-typescript.md
+├── project-specific/              # 项目特定知识
+│   ├── architecture-decisions.md
+│   ├── naming-conventions.md
+│   └── historical-lessons.md
+├── business-rules.md              # 业务规则
+├── compliance-requirements.md     # 合规要求
+├── security-standards.md          # 安全标准
+├── common-patterns.md             # 常见设计模式
+├── best-practices.md              # 最佳实践
+├── anti-patterns.md               # 反模式
+├── architecture-templates.md      # 架构模板
+├── domain-glossary.md             # 领域术语表
+└── legacy-constraints.md          # 历史约束
+```
+
 #### 1.3.3 Solution Quality Gate
 
 方案设计完成、Spec 生成前必须通过 8 项检查：
@@ -258,6 +285,9 @@ priority: must | should | could | wont
 validated_by: "@name"
 required_context:
   - docs/architecture.md#L50-L80
+required_domain_knowledge:
+  - domain-knowledge/industry/{domain}.md
+  - domain-knowledge/tech-stack/{stack}.md
 autonomy_level: L2
 ---
 ```

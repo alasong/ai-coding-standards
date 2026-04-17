@@ -101,3 +101,98 @@ domain-knowledge/
 ### 3.3 Solution Quality Gate 脚本
 
 见 `scripts/solution-quality-gate.sh`。
+
+### 3.4 `.gate/design-output.json` 格式
+
+方案设计通过 Solution Quality Gate 后，AI 必须生成设计输出证据文件：
+
+```json
+{
+  "type": "design-output",
+  "deliverable_type": "solution-design",
+  "design_file": "docs/solutions/{feature-id}-design.md",
+  "checklist": {
+    "需求覆盖": true,
+    "架构一致性": true,
+    "接口完整性": true,
+    "数据模型正确": true,
+    "异常处理": true,
+    "可测试性": true,
+    "依赖明确": true,
+    "风险评估": true
+  },
+  "ai_claims": [
+    "与现有架构无冲突",
+    "不违反任何 ADR"
+  ],
+  "evidence": [
+    {
+      "claim": "与现有架构无冲突",
+      "sources": ["docs/architecture.md#L50", "ADR-003"]
+    }
+  ],
+  "reviewed_by": "@reviewer",
+  "status": "approved"
+}
+```
+
+### 3.5 `.aicoding.yaml` 完整链配置
+
+带 prompt_file、model、input/output 声明的完整 Requirement→Spec 链配置：
+
+```yaml
+requirement_to_spec_chain:
+  phases:
+    - name: requirement_analysis
+      decision_point: DP0
+      prompt_file: prompts/requirement-analysis-v1.md
+      model: high
+      input:
+        - user_raw_requirement
+        - domain-knowledge/industry/{domain}.md
+      output:
+        - structured_requirement.md
+      gate:
+        - human_review: DP0
+
+    - name: architecture_adaptation
+      decision_point: DP0.5
+      prompt_file: prompts/architecture-adaptation-v1.md
+      model: high
+      input:
+        - structured_requirement.md
+        - docs/architecture.md
+      output:
+        - architecture-adaptation-analysis.md
+      gate:
+        - human_review: DP0.5
+
+    - name: solution_design
+      decision_point: DP0.7
+      prompt_file: prompts/solution-design-v1.md
+      model: medium
+      input:
+        - architecture-adaptation-analysis.md
+        - templates/solution-design.md
+      output:
+        - docs/solutions/{feature-id}-design.md
+      gate:
+        - quality_gate: solution-quality-gate
+        - human_review: DP0.7
+
+    - name: spec_generation
+      decision_point: DP1
+      prompt_file: prompts/spec-generation-v1.md
+      model: medium
+      input:
+        - docs/solutions/{feature-id}-design.md
+        - templates/spec-template.md
+      output:
+        - specs/{feature-id}-spec.md
+      gate:
+        - spec_validation: spec-validate.py
+        - human_review: DP1
+
+  max_retries_per_phase: 3
+  fail_action: escalate_to_human
+```
