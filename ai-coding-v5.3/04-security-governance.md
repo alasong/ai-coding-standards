@@ -107,3 +107,45 @@
 | Restricted 数据被发送给 AI | 立即停止 → 数据影响评估 → 通知数据保护负责人 |
 | 幻觉代码合并到 main | 立即 revert → 根因分析 → 强化审查 |
 | AI 提供者质量严重退化 | 降低自治等级 → 切换模型 → 回归测试 |
+
+---
+
+## 第 6 章：提示注入防护
+
+### 6.1 攻击向量
+
+| 来源 | 攻击向量 | 风险级别 |
+|------|---------|---------|
+| 代码仓库 | 恶意文件包含注入指令 | HIGH |
+| PR 评论 | 评论中嵌入覆盖指令 | MEDIUM |
+| 依赖包 | package.json description 嵌入指令 | HIGH |
+| Spec 文件 | 伪造的 Spec 包含恶意指令 | CRITICAL |
+| 环境变量 | 恶意设置的环境变量 | HIGH |
+| MCP 响应 | MCP 服务器返回注入内容 | MEDIUM |
+
+### 6.2 四层防御
+
+| 层 | 机制 | 说明 |
+|----|------|------|
+| **L1 输入净化** | 检测覆盖型指令、角色覆盖、数据外泄指令、安全机制禁用指令 | 正则匹配 + 阻断 |
+| **L2 上下文验证** | 系统 Prompt 完整性验证、上下文篡改检测、预期 vs 实际对比 | Hash 比对 |
+| **L3 行为监控** | 监控异常操作模式、检测超出置信范围的操作、记录审计日志 | 运行时监控 |
+| **L4 输出验证** | 验证输出不包含敏感数据、检查输出匹配预期行为、异常输出阻断 | 输出门禁 |
+
+### 6.3 关键检测规则
+
+| 模式 | 严重级别 | 动作 |
+|------|---------|------|
+| `ignore/override/bypass` + `instruction/rule/constraint` | CRITICAL | 阻断 |
+| `you are now/your new role` + `security/admin/root` | CRITICAL | 阻断 |
+| `send/transmit/upload` + `env/secret/key/token` | CRITICAL | 阻断 |
+| `disable/turn off/skip/bypass` + `security/sandbox/gate` | CRITICAL | 阻断 |
+| `git push --force / reset --hard` | HIGH | 阻断 |
+
+### 6.4 应急响应
+
+| 严重级别 | 动作 |
+|---------|------|
+| **Critical** | 立即阻断 → 暂停 auto 模式 → P0 事件报告 → 隔离受影响会话 → 根因分析 |
+| **High** | 阻断当前操作 → 记录审计日志 → 净化上下文 → 继续执行 |
+| **Medium/Low** | 记录审计日志 → 净化上下文 → 继续执行 |
