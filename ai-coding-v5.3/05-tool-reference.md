@@ -229,3 +229,51 @@ requirement_to_spec_chain:
 | **测试充分性** | 测试覆盖了哪些路径？遗漏了哪些路径？ | ❌ "测试覆盖充分" |
 
 **AC 覆盖验证规则**：1. 列出所有 AC；2. 对每个 AC 找到 ≥1 对应测试函数名；3. 对每个 AC 确认 ≥2 项证据（代码文件存在 + `.gate/` 运行输出）；4. 分别报告包通过率 / AC 覆盖率 / 端点通过率，禁止合并为单一数字；5. AC 覆盖率 < 100% = 功能未完成，不得标记 Spec 为 `done`。
+
+---
+
+## 第 5 章：权限系统
+
+### 5.1 权限模式
+
+| 模式 | 无需确认 | 需要确认 | 禁止 | 适用场景 |
+|------|---------|---------|------|---------|
+| `default` | 只读操作 | Bash、编辑 | Protected Paths | 新手团队 |
+| `acceptEdits` | 只读 + 编辑 + FS 命令 | Bash 命令 | Protected Paths、危险命令 | **推荐默认（L1-L2）** |
+| `plan` | 只读 | 无（全部写操作需确认） | 任何写操作 | 代码探索 |
+| `auto` | 全部操作 | 超出置信阈值 | Protected Paths | **L3-L4 自主编码** |
+| `dontAsk` | 仅预批准工具 | 无 | 未预批准操作 | **CI 流水线** |
+| `bypassPermissions` | 全部 | 无 | 仅 Protected Paths | **隔离容器（危险）** |
+
+### 5.2 权限规则语法
+
+格式：`工具名(路径模式)`，支持通配符。规则优先级：**deny → ask → allow**，deny 始终优先。
+
+```json
+{
+  "permissions": {
+    "allow": ["Bash(make build)", "Bash(go test ./...)"],
+    "ask":   ["Bash(git *)", "Bash(npm run *)"],
+    "deny":  ["Bash(rm -rf *)", "Bash(curl *)"]
+  }
+}
+```
+
+通配符：`*` 匹配文件名，`**` 匹配路径深度，`?` 单字符，`[abc]` 字符集，`[!abc]` 排除字符集。
+
+### 5.3 Protected Paths
+
+系统级保护，**任何权限模式都无法绕过**：
+
+| 类别 | 路径模式 |
+|------|---------|
+| 系统文件 | `/etc/**`, `/usr/**` |
+| 用户凭证 | `~/.ssh/**`, `~/.gnupg/**`, `~/.kube/config` |
+| 环境变量 | `.env`, `.env.*`, `.env.local` |
+| 密钥目录 | `./secrets/**`, `./credentials/**`, `./keys/**` |
+| Git 内部 | `.git/**` |
+| AI 会话文件 | `~/.claude/**`, `.omc/**` |
+| 构建产物 | `node_modules/**`, `vendor/**` |
+| 日志文件 | `/var/log/**`, `./logs/**.log` |
+
+自定义 Protected Paths 可通过 `protectedPaths` 字段添加（如 `./config/production/**`、`./certs/**`）。
