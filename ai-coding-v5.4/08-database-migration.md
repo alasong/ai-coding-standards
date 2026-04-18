@@ -53,11 +53,11 @@
 每个数据库迁移必须**先写测试**，测试通过后才能执行迁移。
 
 ```
-1. 写迁移脚本（migration.sql）
-2. 写迁移测试（migration_test.go）
+1. 写迁移测试（migration_test.go）
    a. 测试迁移可以执行（Up）
    b. 测试迁移可以回滚（Down）
    c. 测试迁移后数据完整性
+2. 写迁移脚本（migration.sql）
 3. 在干净的测试数据库运行迁移 → 测试通过
 4. 在 CI 中运行 → 记录到 .gate/migration-test.json
 5. 合并后执行
