@@ -1,7 +1,7 @@
 # AI Coding 规范 v5.4：索引
 
 > 版本：v5.4 | 2026-04-18
-> 定位：IPD 方法引擎驱动的 Auto-Coding 规范 — 每个阶段都有可执行的方法论
+> 定位：大规模高复杂度 Auto-Coding 规范集 — IPD 方法引擎 + 全链路交付治理
 
 ---
 
@@ -58,17 +58,40 @@
 
 ## 文档结构
 
+### 核心规范
+
 | # | 文档 | 说明 |
 |---|------|------|
 | 01 | [核心规范](01-core-specification.md) | 核心原则（P1-P23）、IPD 六阶段方法引擎、自治等级、TDD、Spec 驱动 |
 | 02 | [Auto-Coding 实践](02-auto-coding-practices.md) | 自主编码模式、定时任务、夜间开发、自修复 CI、Supervisor-Worker |
-| 03 | [多 Agent 与多平台](03-multi-agent-multi-surface.md) | Sub-Agents、Agent SDK、多平台协同 |
+| 03 | [多 Agent 与多平台](03-multi-agent-multi-surface.md) | Sub-Agents、Agent SDK、多平台协同、冲突解决、并行度控制 |
 | 04 | [安全与治理](04-security-governance.md) | 企业部署、权限管理、MCP 安全、合规、审计 |
-| 05 | [工具参考](05-tool-reference.md) | CLI 参考、Settings、Hooks、Skills、配置模板 |
-| 07 | [反幻觉方案](07-anti-hallucination.md) | 45 种幻觉类型、证据链方法论 |
-| 08 | [能力差距分析](08-capability-gap-analysis.md) | AI 能力差距分析、技能评估 |
+| 05 | [工具参考](05-tool-reference.md) | CLI 参考、Settings、Hooks、Skills、配置模板、审查清单 |
+| 06 | [CI/CD Pipeline](06-cicd-pipeline.md) | L0-L5 分层结构、质量门禁、Self-Correction、环境晋升、Artifact 管理 |
+| 07 | [反幻觉方案](07-anti-hallucination.md) | 45 种幻觉类型、证据链方法论、检测与防护 |
+
+### 交付基础设施
+
+| # | 文档 | 说明 |
+|---|------|------|
+| 07-O | [可观测性](07-observability.md) | 结构化日志、RED 指标、分布式追踪、SLO/SLA、告警、Dashboard |
+| 08 | [数据库迁移](08-database-migration.md) | TDD 迁移、destructive change 检测、蓝绿迁移、Expand-Contract |
+| 09 | [API 契约与版本](09-api-contracts.md) | OpenAPI 管理、契约测试、向后兼容、破坏性变更通知、版本策略 |
+| 10 | [依赖与供应链](10-dependency-management.md) | 依赖审批、漏洞 SLA、Typosquatting 检测、SBOM、供应链安全 |
+| 11 | [性能基线](11-performance-baseline.md) | 性能预算、自动基准测试、CI 门禁、性能剖析、压力测试 |
+| 12 | [AI 成本管理](12-ai-cost-management.md) | Token 预算、模型路由、Prompt 优化、上下文复用、ROI 度量 |
+| 13 | [部署与回滚](13-deploy-rollback.md) | 蓝绿/金丝雀/滚动、回滚机制、多服务编排、Feature Flag |
+| 14 | [发布管理](14-release-management.md) | 版本编号、Release Notes、CHANGELOG、发布节奏、Hotfix |
+
+### 运营与治理
+
+| # | 文档 | 说明 |
+|---|------|------|
+| 15 | [环境、缓存与 Review SLA](15-environment-cache-sla.md) | 环境分层、测试数据脱敏、缓存架构、Code Review SLA |
+| 16 | [安全测试与混沌工程](16-security-chaos.md) | DAST、渗透测试、混沌工程、AI 安全测试、合规验证 |
+| 17 | [数据治理与国际化](17-data-governance-i18n.md) | 数据血缘、PII、GDPR、备份恢复、i18n/A11y、数据生命周期 |
 | - | [模板](templates/) | 方案设计模板、架构文档模板 |
-| - | [脚本](scripts/) | Solution Quality Gate 脚本 |
+| - | [脚本](scripts/) | Quality Gate 脚本、Spec 验证工具 |
 
 ---
 
