@@ -62,6 +62,7 @@
 
 | # | 文档 | 说明 |
 |---|------|------|
+| 00 | [规范哲学](00-philosophy.md) | 元规则：规范解决什么、准入标准、冲突裁决、写作规范、演进原则 |
 | 01 | [核心规范](01-core-specification.md) | 核心原则（P1-P23）、IPD 六阶段方法引擎、自治等级、TDD、Spec 驱动 |
 | 02 | [Auto-Coding 实践](02-auto-coding-practices.md) | 自主编码模式、定时任务、夜间开发、自修复 CI、Supervisor-Worker |
 | 03 | [多 Agent 与多平台](03-multi-agent-multi-surface.md) | Sub-Agents、Agent SDK、多平台协同、冲突解决、并行度控制 |
