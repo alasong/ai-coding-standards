@@ -187,18 +187,6 @@ Phase 3 — Contract（旧代码完全下线后执行）：
 | 部分索引 | `WHERE` 条件索引可以减小体积 |
 | 主键变更 | 禁止在线表上直接 ALTER PRIMARY KEY，需蓝绿迁移 |
 
-```
-禁止：ALTER TABLE users ADD COLUMN email_verified BOOLEAN NOT NULL;
-
-正确做法：
-  -- Step 1: 添加允许 NULL 的列
-  ALTER TABLE users ADD COLUMN email_verified BOOLEAN;
-  -- Step 2: 填充默认值（大表需分批，避免锁表）
-  UPDATE users SET email_verified = false WHERE email_verified IS NULL;
-  -- Step 3: 添加 NOT NULL 约束
-  ALTER TABLE users ALTER COLUMN email_verified SET NOT NULL;
-```
-
 ---
 
 ## 第 4 章：蓝绿数据库迁移
