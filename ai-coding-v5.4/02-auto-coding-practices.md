@@ -37,11 +37,7 @@
 
 ### 2.1 TDD-first 循环
 
-```
-[生成测试] → [验证 Red] → [生成实现] → [验证 Green] → [Self-Correct(≤3 轮)] → [Refactor] → [AI Review] → [提交 PR]
-```
-
-详细流程见 [01-core-specification.md](01-core-specification.md) 第 2 章。
+> 流程见 [01-core-specification.md](01-core-specification.md) 第 2 章。
 
 ### 2.2 Prompt Chaining
 

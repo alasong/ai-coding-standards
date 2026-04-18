@@ -1,7 +1,7 @@
 # AI Coding 规范 v5.4：发布管理
 
 > 版本：v5.4 | 2026-04-18
-> 定位：大规模 Auto-Coding 场景下的版本控制、发布说明、变更日志、Feature Flag 生命周期、发布节奏、发布检查清单与 Hotfix 流程
+> 定位：大规模 Auto-Coding 场景下的版本控制、发布说明、变更日志、Feature Flag 发布标注、发布节奏、发布检查清单与 Hotfix 流程
 > 前置：[01-core-specification.md](01-core-specification.md) P1-P11、[06-cicd-pipeline.md](06-cicd-pipeline.md) L0-L5 Pipeline、[13-deploy-rollback.md](13-deploy-rollback.md) 部署策略与 Feature Flag
 
 ---
@@ -27,7 +27,7 @@
 | 版本号 | SemVer + Auto-Coding 后缀，谁决定 bump | 本文档第 2 章 |
 | Release Notes | AI 自动生成，从 commit/PR/Spec 聚合 | 本文档第 3 章 |
 | Change Log | 结构化 CHANGELOG 格式 | 本文档第 4 章 |
-| Feature Flag | 创建、Rollout、Retirement 生命周期 | 本文档第 5 章 + [13-deploy-rollback.md](13-deploy-rollback.md) 第 5 章 |
+| Feature Flag | Release/CHANGELOG 中的 Flag 标注、清理期限追踪 | 本文档第 5 章 + [13-deploy-rollback.md](13-deploy-rollback.md) 第 5 章 |
 | 发布节奏 | Cadence 定义、批量大小规则 | 本文档第 6 章 |
 | 发布检查清单 | 发布前必须验证的条目 | 本文档第 7 章 |
 | Hotfix | 紧急发布流、Bypass 规则、事后修复 | 本文档第 8 章 |
@@ -306,114 +306,53 @@ CI 在 L3 层执行以下检查：
 
 ---
 
-## 第 5 章：Feature Flag 生命周期
+## 第 5 章：Feature Flag 发布标注
 
-> 注：Feature Flag 的详细技术规范在 [13-deploy-rollback.md](13-deploy-rollback.md) 第 5 章定义。本章聚焦生命周期的创建→Rollout→Retirement 流程，以及 AI 生成的 Flag 要求。
+> 注：Feature Flag 的详细技术规范（分层、Kill Switch、配置模板、渐进 Rollout 步骤、AI 生成 Flag 强制要求、清理流程）在 [13-deploy-rollback.md](13-deploy-rollback.md) 第 5 章定义。本章仅覆盖**发布管理层面的 Flag 标注**要求。
 
-### 5.1 生命周期阶段
+### 5.1 发布层面的 Flag 标注
 
-```
-创建 → 配置 → 默认关闭 → 渐进 Rollout → 全量开启 → 清理（Retirement）
-  │        │         │          │           │          │
-  L3       L3       L3/L4       L5          L3         L2
-  生成     注册      部署        发布         验证       代码移除
-```
+每次发布时，Release Notes 和 CHANGELOG 必须标注本批次涉及的 Feature Flag 状态。这些标注从 PR 描述和 Flag 配置文件中自动提取，由 CI L3 层验证。
 
-| 阶段 | 触发条件 | 执行者 | 输出 Artifact |
-|------|---------|-------|--------------|
-| **1. 创建** | AI 生成新功能代码 | AI Agent | `feature-flags/ai-{spec_id}-{name}.yaml` |
-| **2. 配置** | PR 创建时 | AI Agent + CI L3 | Flag 注册到配置中心 |
-| **3. 默认关闭** | 代码合并到 main | CI Pipeline | Flag 默认值 = false |
-| **4. 渐进 Rollout** | 发布后按计划 | CI / 产品团队 | Rollout 进度记录 |
-| **5. 全量开启** | 100% 用户 + 48h 无事故 | 产品团队/CI | Flag = true |
-| **6. 清理** | 全量开启后 ≤ 4 周 | AI Agent 自动创建 PR | Flag 代码和条件分支移除 |
+| 标注项 | Release Notes | CHANGELOG | 来源 |
+|-------|:------------:|:---------:|------|
+| **Flag 名称** | 每个新 Feature 条目后标注 | `## [Unreleased]` 段括号内标注 | PR 描述 / `feature-flags/*.yaml` |
+| **默认状态** | 标注 `(default: off)` 或 `(default: on)` | 同 Release Notes | Flag 配置 `default` 字段 |
+| **Kill Switch** | 标注 Kill Switch 名称 | 不标注 | Flag 配置 `kill_switch` 字段 |
+| **清理截止日期** | 标注 `(cleanup deadline: {date})` | 不标注 | 13-deploy-rollback.md 5.4 节（4 周上限） |
+| **Rollout 状态** | 已全量开启的标注 `(rollout: 100%)` | 标注 `retired` 若 Flag 已清理 | CI 从配置中心读取 |
 
-### 5.2 AI 生成 Flag 的强制要求
+### 5.2 CHANGELOG 中的 Flag 追踪
 
-| 约束 | 说明 | 违反后果 |
-|------|------|---------|
-| **每个新功能必须有 Flag** | Spec 中定义的 Feature 必须有对应 Flag | L3 阻断 |
-| **命名规范** | `ai.{spec_id}.{feature_name}` | L0 警告 |
-| **默认关闭** | 默认值必须是 `false` / `off` | L3 阻断 |
-| **必须定义清理计划** | PR 中必须包含 Flag 清理的 TODO，含预计清理日期 | L3 警告 |
-| **必须有 Kill Switch** | 每个 `ai.*` Flag 必须有对应的独立 Kill Switch | L3 阻断 |
-| **过期自动清理** | CI 在 L3 层检测存活 > 30 天的 AI Flag，> 45 天阻断 | L3 警告→阻断 |
-| **定期清理报告** | 每周 AI 自动生成 Flag 健康报告 | L4 自动 |
+CHANGELOG 条目中的 Flag 标注格式（见第 4.2 节扩展字段）：
 
-### 5.3 Flag 清理（Retirement）流程
-
-```
-全量开启 48h 后
-  │
-  ├─→ AI 检测 Flag 使用状态：
-  │     - 所有条件分支是否都走 true 路径？
-  │     - 是否有灰度流量仍然走 false 路径？
-  │     - 是否有其他 Flag 依赖此 Flag？
-  │
-  ├─→ 确认可以清理
-  │
-  ├─→ AI 自动创建 PR：
-  │     - 移除 Flag 定义文件
-  │     - 移除代码中的条件分支（保留 true 路径）
-  │     - 更新 CHANGELOG（标注 Flag 清理）
-  │
-  ├─→ CI 验证：
-  │     - L1: 编译通过
-  │     - L2: 测试通过
-  │     - L3: 无残留 Flag 引用
-  │
-  └─→ PR 合并 → Flag 正式退役
+```markdown
+### Added
+- ai.F042: AI recommendation engine (`ai.F042.new_recommendation_engine`, default: off)
+  [PR #142](link) | [Spec F042](specs/F042.md)
+  Cleanup deadline: 2026-05-18
 ```
 
-**约束**：
-- 清理 PR 的变更范围必须**仅包含 Flag 移除**，不得夹带其他变更
-- 清理 PR 通过 L3 后自动合并（视为 trivial fix）
-- 清理后的代码中不得保留死分支（`if (flag) { ... } else { /* old */ }` 的 else 部分必须删除）
+Flag 清理后的 CHANGELOG 条目：
 
-### 5.4 Flag 健康报告
-
-CI 每周自动生成 `.gate/flag-health-report.json`：
-
-```json
-{
-  "type": "flag-health-report",
-  "generated_at": "2026-04-18T00:00:00Z",
-  "flags": [
-    {
-      "name": "ai.F042.new_recommendation_engine",
-      "status": "active",
-      "created_at": "2026-04-10",
-      "days_alive": 8,
-      "current_rollout": "10%",
-      "expiry_date": "2026-05-10",
-      "days_to_expiry": 22,
-      "kill_switch": "ai.F042.kill_switch",
-      "cleanup_pr_created": false,
-      "risk_level": "low"
-    },
-    {
-      "name": "ai.F031.old_search_engine",
-      "status": "EXPIRED",
-      "created_at": "2026-03-01",
-      "days_alive": 48,
-      "current_rollout": "100%",
-      "expiry_date": "2026-03-31",
-      "days_to_expiry": -18,
-      "kill_switch": "ai.F031.kill_switch",
-      "cleanup_pr_created": true,
-      "cleanup_pr": "#155",
-      "risk_level": "high"
-    }
-  ],
-  "summary": {
-    "total_flags": 12,
-    "ai_flags": 8,
-    "expired_flags": 1,
-    "flags_pending_cleanup": 2,
-    "average_lifetime_days": 18
-  }
-}
+```markdown
+### Internal
+- Retired flag `ai.F031.old_search_engine` (previously F031)
+  [PR #155](link)
 ```
+
+### 5.3 清理期限追踪
+
+CI 在发布检查清单（第 7 章）中增加以下 Flag 清理期限检查：
+
+| 检查项 | 规则 | 失败策略 |
+|-------|------|---------|
+| **过期 Flag 未清理** | 存在 > 45 天的 `ai.*` Flag | L3 阻断（见 13-deploy-rollback.md 5.4） |
+| **清理 PR 未合并** | 过期 Flag 的清理 PR 已创建但未合并 | L3 警告 |
+| **清理 Deadline 临近** | Flag 清理截止日期 ≤ 7 天 | Release Notes 中标注警告 |
+| **无清理计划** | Flag 创建时未定义清理截止日期 | L3 警告 |
+
+Flag 健康报告（`.gate/flag-health-report.json`）由 13-deploy-rollback.md 第 5 章定义的流程生成，发布管理仅消费该报告用于清理期限检查。
 
 ---
 
@@ -720,14 +659,12 @@ Hotfix 完成后 **24 小时内**必须完成以下事后修复动作：
 | `.gate/hotfix-report-{NNN}.json` | Hotfix 完成后 | Hotfix 详情、根因分析、事后修复状态 |
 | `CHANGELOG.md` | PR 合并时更新 | 结构化变更日志 |
 
-## 附录 B：版本号决策速查表
+## 附录 B：版本号决策补充
+
+以下为 2.2 节未覆盖的额外 bump 规则（基础规则见第 2.2 节）：
 
 | 变更场景 | Bump 级别 | 决定者 | 是否需要人工 |
 |---------|:--------:|-------|:-----------:|
-| 破坏性 API 变更 | MAJOR | 架构师/技术负责人 | **必须** |
-| 新功能上线（向后兼容） | MINOR | AI 建议 + 人工确认 | L2/L3: 是, L4: 否 |
-| Bug 修复 | PATCH | AI 自动 | 否 |
-| Hotfix | PATCH + `-hotfix-NNN` | AI 自动 + on-call | P0: on-call 确认 |
 | 仅文档变更 | PATCH（或跳过） | AI 自动 | 否 |
 | 仅配置变更 | PATCH（或跳过） | AI 自动 | 否 |
 | 依赖升级（非安全） | PATCH | AI 自动 | 否 |
