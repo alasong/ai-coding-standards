@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.3：反幻觉方案
+# AI Coding 规范 v5.4：反幻觉方案
 
-> 版本：v5.3 | 2026-04-17
+> 版本：v5.4 | 2026-04-17
 > 定位：45 种幻觉类型、证据链方法论、检测与防护方案
 > 前置：必须先阅读并理解 [01-core-specification.md](01-core-specification.md)
 

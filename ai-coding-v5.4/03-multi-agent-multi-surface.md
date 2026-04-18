@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.3：多 Agent 与多平台
+# AI Coding 规范 v5.4：多 Agent 与多平台
 
-> 版本：v5.3 | 2026-04-17
+> 版本：v5.4 | 2026-04-17
 > 定位：Sub-Agents、Agent SDK、多平台协同的实践指南
 > 前置：必须先阅读并理解 [01-core-specification.md](01-core-specification.md)
 

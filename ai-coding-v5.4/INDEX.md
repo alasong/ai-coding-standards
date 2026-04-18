@@ -1,7 +1,7 @@
-# AI Coding 规范 v5.3：索引
+# AI Coding 规范 v5.4：索引
 
-> 版本：v5.3 | 2026-04-17
-> 定位：最终发布版本 — 消除所有文档间冗余、统一术语、规范化结构
+> 版本：v5.4 | 2026-04-18
+> 定位：IPD 方法引擎驱动的 Auto-Coding 规范 — 每个阶段都有可执行的方法论
 
 ---
 
@@ -60,7 +60,7 @@
 
 | # | 文档 | 说明 |
 |---|------|------|
-| 01 | [核心规范](01-core-specification.md) | 核心原则（P1-P23）、自治等级、TDD、Spec 驱动、Prompt 管理、幻觉检测 |
+| 01 | [核心规范](01-core-specification.md) | 核心原则（P1-P23）、IPD 六阶段方法引擎、自治等级、TDD、Spec 驱动 |
 | 02 | [Auto-Coding 实践](02-auto-coding-practices.md) | 自主编码模式、定时任务、夜间开发、自修复 CI、Supervisor-Worker |
 | 03 | [多 Agent 与多平台](03-multi-agent-multi-surface.md) | Sub-Agents、Agent SDK、多平台协同 |
 | 04 | [安全与治理](04-security-governance.md) | 企业部署、权限管理、MCP 安全、合规、审计 |
