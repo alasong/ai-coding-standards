@@ -149,7 +149,7 @@ PR 合并到 main
 | **PR 描述** | 1 | 主要信息源，含 Spec 引用、部署信息、Feature Flag 声明 |
 | **Spec 文件** | 2 | 功能验收条件、用户故事、商业目标 |
 | **Commit messages** | 3 | 补充细节，但不得与 PR 描述冲突 |
-| **Pipeline 结果** | 4 | 性能指标、测试覆盖率、安全评分 |
+| **Pipeline 结果** | 4 | 性能指标、AC 覆盖率、安全评分 |
 | **CHANGELOG 差异** | 5 | 自上次发布以来的变更汇总 |
 
 **冲突解决**：PR 描述与 commit message 冲突时，以 PR 描述为准。Spec 与 PR 描述冲突时，以 Spec 为准（Spec 是单一信息源）。

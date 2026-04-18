@@ -348,7 +348,7 @@ Team Lead 根据依赖图按批次启动：无依赖任务全并行 → 通过 T
 ## 验收标准
 1. token 生成 < 10ms
 2. token 验证 < 5ms
-3. 测试覆盖率 > 80%
+3. AC 覆盖率 100%
 4. 通过安全审查（04-security-governance.md）
 
 ## 约束

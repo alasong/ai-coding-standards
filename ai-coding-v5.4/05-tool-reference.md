@@ -31,7 +31,9 @@ gate:
       - compile: "go build ./..."
       - test: "go test ./... -cover"
       - lint: "golangci-lint run"
-    coverage_threshold: 80
+    ac_coverage_required: 100
+    package_coverage_threshold: 80
+    package_coverage_action: warn
     fail_action: self-correct
 
   self_correction:

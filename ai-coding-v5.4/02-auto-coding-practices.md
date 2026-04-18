@@ -98,7 +98,7 @@ AI 到达 Decision Point → 生成 DP 摘要 → 通过通知渠道发送人工
 - [ ] Kill Switch 参数已设置
 - [ ] 通知 Channel 已测试
 - [ ] Remote Control 已启用
-- [ ] 测试覆盖率 ≥ 80%
+- [ ] AC 覆盖率 100%（包覆盖率不得较基线下降 > 5%）
 
 ---
 
