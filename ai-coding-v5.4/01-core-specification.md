@@ -384,6 +384,26 @@ Fail → 返回 Executor 修复
 | PR 创建前 | CI Pipeline L3 层自动调用 |
 | IPD Phase 转换 | Phase N → Phase N+1 时自动调用 |
 
+### 1.8 Multi-Pass Review Protocol
+
+> 完整定义：[19-multi-pass-review.md](19-multi-pass-review.md)
+
+每个 IPD Phase 产出完成后，必须执行 **5 轮审查**，对 **7 个 Gate** 的 **25 个检查项** 逐项进行 **3 轮独立验证**：
+
+| Pass | 名称 | 执行者 | 视角 |
+|------|------|--------|------|
+| **P1** | Self-Verify | 作者/Executor | 完整性 |
+| **P2** | Cross-Verify | 独立 Agent | 上下游一致性 |
+| **P3** | Adversarial Review | 独立 Agent | 竞品/审计/攻击者视角 |
+| **P4** | Gate Checker | 独立 Gate Checker Agent | 规范合规（只读）|
+| **P5** | Human Reviewer | 人类 | 战略对齐 + 风险接受度 |
+
+**审查次数**：7 Gate × ~5 检查项 × 3 轮验证 × 5 Pass = **525 次**（自动达成 ≥200 次要求）。
+每次审查必须有明确的工具、方法和通过标准，不得人为削减轮次以凑数字。
+
+**逃逸条件**：微小变更（≤5 行单文件）、纯格式变更、紧急 Hotfix 可跳过部分 Pass，
+但必须在 Gate Report 中注明原因。
+
 ---
 
 ## 第 2 章：TDD 与质量保障
