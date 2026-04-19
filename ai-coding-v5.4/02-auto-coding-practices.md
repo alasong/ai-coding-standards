@@ -33,30 +33,18 @@
 
 ---
 
-## 第 2 章：自主编码模式
+## 第 2 章：自主编码模式（引用）
 
-### 2.1 TDD-first 循环
+本章涉及的核心机制定义在 [01-core-specification.md](01-core-specification.md) 中：
 
-> 流程见 [01-core-specification.md](01-core-specification.md) 第 2 章。
+| 概念 | 定义位置 | 说明 |
+|------|---------|------|
+| TDD 循环 | 01-core §2 | Red → Green → Refactor，提交顺序验证，Red 阶段记录 |
+| Prompt Chaining | 01-core §3.2 | 分析 → 设计 → 编码 → 验证，每步以上一步输出为输入 |
+| Self-Correction Loop | 01-core §2.2 | 最多 3 轮，Pipeline 各层级轮次限制见 06-cicd-pipeline.md §4.1 |
+| Skill Generalization | 01-core §1.3.6 | 模式识别 → 跨项目复用 → 知识沉淀 → 反模式记录 |
 
-### 2.2 Prompt Chaining
-
-> 详细定义见 [01-core-specification.md](01-core-specification.md) 3.2。
-
-编码阶段的链式执行：分析链 → 设计链 → 编码链 → 验证链。每步最大重试 3 次，超过转人工。**每一步必须以上一步的输出作为输入，不得跳过中间步骤直接执行后续步骤。**
-
-### 2.3 Self-Correction Loop
-
-> 详细定义见 [01-core-specification.md](01-core-specification.md) 2.2。
-
-**修复禁忌**：不得修改测试断言使其"通过"、不得删除失败测试、不得添加 `@skip`、不得吞异常。
-
-### 2.4 Skill Generalization
-
-每个 Feature 的需求→Spec 链完成后触发：
-- 成功模式 → `domain-knowledge/tech-stack/{stack}.md`
-- 失败模式 → `domain-knowledge/project-specific/historical-lessons.md`
-- 设计模式 → `domain-knowledge/project-specific/architecture-decisions.md`
+**修复禁忌**（02-auto-coding 独有）：不得修改测试断言使其"通过"、不得删除失败测试、不得添加 `@skip`、不得吞异常。
 
 ---
 
