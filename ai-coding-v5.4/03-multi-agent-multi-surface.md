@@ -455,6 +455,8 @@ def refresh_token(old_token: str) -> str: ...
 
 协调器汇总各 Agent 测试结果到 `.omc/test-results/aggregate.yaml`，格式包含各 Agent 各类型的 passed/failed/skipped 计数，有失败即整体失败。
 
+**独立验证**：协调器不得仅依赖 Worker 自报的测试结果。对于关键路径测试（安全、核心业务逻辑），协调器必须独立重新运行至少 1 个代表性测试以验证 Worker 报告的真实性。此要求与 [02-auto-coding-practices.md](02-auto-coding-practices.md) Supervisor-Worker 模式的独立复测要求一致。
+
 ---
 
 ## 第 14 章：Agent 资源配额

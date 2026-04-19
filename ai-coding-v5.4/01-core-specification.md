@@ -52,7 +52,8 @@
 - 不得：跳过 DCP 直接进入下一 Phase
 - 必须：DCP 检查必须附带深度评分（depth score），不仅检查"有没有做"，还检查"做得够不够深"
 - 不得：由完成该 Phase 工作的 Agent 给自己评分。深度评分必须由独立 Agent（critic/architect/reviewer）执行
-- 验证：`ipd/phase-N/dcp-checklist.md` 存在且所有检查项为 PASS；`.gate/depth-score-{phase}.json` 存在且每项 ≥ 2 分
+- 必须：DCP checklist 的 PASS/FAIL 判定由独立 Gate Checker Agent 执行（§1.7），不得由产出物创建者自评
+- 验证：`ipd/phase-N/dcp-checklist.md` 存在且所有检查项为 PASS；`.gate/depth-score-{phase}.json` 存在且每项 ≥ 2 分；`scored_by` 字段不为 "self"
 
 **P3 TDD 先行**
 - 必须：测试先于实现编写，测试必须先失败（Red），再写实现（Green）
@@ -387,7 +388,7 @@ P12-P22 通过四层机制自动拦截，不是靠 AI 自觉：
 }
 ```
 
-#### 自我验证（防止评分变成样子货）
+#### 独立 Agent 验证（防止自评变成样子货）
 
 评分报告 `.gate/depth-score-{phase}.json` 必须包含 `self_check` 字段，自动检测异常模式：
 
@@ -397,7 +398,17 @@ P12-P22 通过四层机制自动拦截，不是靠 AI 自觉：
 | 全 2 分 | 所有维度都是 2 分 | 标记 `[DEPTH-ROBOTIC]`，要求至少 1 项差异化评分 |
 | 评分与缺陷不一致 | 评分 ≥ 80% 但该 Phase 后续发现 ≥ 3 个设计缺陷 | 标记 `[DEPTH-INVALID]`，回溯调整该维度基线 |
 
-评分必须由独立 Agent 执行（完成该 Phase 工作的 Agent 不得给自己评分），每项评分必须引用具体内容作为证据。
+**独立 Agent 要求：**
+- 深度评分必须由独立 Agent 执行，该 Agent 不得与完成该 Phase 工作的 Agent 共享对话上下文
+- 评分报告必须包含 `scored_by: "independent {agent_type}"` 字段
+- 若 `scored_by` 字段为 "self"、"self-assessment" 或同类 Agent 生成，标记 `[DEPTH-SELF-SCORED]`，判定为无效评分，必须重新评分
+- 独立 Agent 评分与自评差异 ≥ 2 分时，以独立 Agent 评分为准
+
+**通用独立验证原则：**
+> **不得由产出物的创建者对该产出物进行 PASS/FAIL 判定。所有 Gate 的 PASS/FAIL 必须由独立 Agent 或自动化工具决定。**
+>
+> 适用于：DCP Checklist（§1.6）、Solution Quality Gate（§1.3.2）、Spec Validation Gate（§4.2）、IPD 传导检查（§1.6.7）、Spec Evolution draft→review 转换（18-spec-evolution-governance.md §1.2）、部署审计完整性验证（13-deploy-rollback.md §8.5）、Supervisor-Worker 测试结果复测（02-auto-coding-practices.md §5、03-multi-agent-multi-surface.md §13.3）。
+> 自动化工具（compiler, gitleaks, go test, golangci-lint）判定视为独立。
 
 ### 1.7 Gate Checker Agent（独立验证）
 
@@ -436,6 +447,9 @@ Fail → 返回 Executor 修复
 | **质量 Gate** | 编译、vet、test、lint、覆盖率基线 | 构建输出 + coverage |
 | **幻觉 Gate** | API 存在性、依赖、符号解析、注释一致性 | 编译 + 符号解析 |
 | **Self-Correction Gate** | 轮次≤3、安全漏洞未自修提交 | `.gate/self-correction.json` |
+| **DCP Gate** | Phase checklist PASS/FAIL 判定、深度评分独立性验证 | `ipd/phase-N/dcp-checklist.md` + `.gate/depth-score-{phase}.json` |
+| **Solution Quality Gate** | 8 项检查由独立 Agent 执行，非方案作者自评 | 方案设计文档 + 8 项检查对照表 |
+| **Spec Validation Gate** | 6 项验证由独立 Agent 执行，非 Spec 作者自评 | Spec 文件 + 6 项验证对照表 |
 
 #### 1.7.4 触发时机
 

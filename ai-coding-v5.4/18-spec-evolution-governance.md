@@ -27,7 +27,7 @@ draft → review → active → deprecated → archived
 
 | 转换 | 触发条件 | 审批方 |
 |------|---------|--------|
-| draft → review | 提案完成，填写 SCR（见第 2 章） | 提案人自检 |
+| draft → review | 提案完成，填写 SCR（见第 2 章）+ Gate Checker Agent 验证 SCR 完整性 | 提案人提交 → Gate Checker 预检 → 审批委员会 |
 | review → active | 评审通过（见 1.3 审批矩阵） | 审批委员会 |
 | active → deprecated | 被新规范替代 | 审批委员会 |
 | deprecated → archived | 保留期满（默认 90 天） | 自动 |
