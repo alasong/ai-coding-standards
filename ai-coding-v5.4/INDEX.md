@@ -92,8 +92,9 @@
 | 16 | [安全测试与混沌工程](16-security-chaos.md) | DAST、渗透测试、混沌工程、AI 安全测试、合规验证 |
 | 17 | [数据治理与国际化](17-data-governance-i18n.md) | 数据血缘、PII、GDPR、备份恢复、i18n/A11y、数据生命周期 |
 | 18 | [规范演进治理](18-spec-evolution-governance.md) | 规范生命周期、变更请求、审批矩阵、过渡期、版本管理 |
-| 19 | [Multi-Pass Review Protocol](19-multi-pass-review.md) | 每阶段 5 轮审查 × 7 Gate × 25 检查项 × 3 轮验证 = 525 次审查 |
-| - | [模板](templates/) | 方案设计模板、架构文档模板 |
+| 19 | [Multi-Pass Review Protocol](19-multi-pass-review.md) | 每阶段 6 轮审查 × 7 Gate × 25 检查项 × 3 轮验证 = 630 次审查 |
+| 20 | [Lessons Learned Protocol](20-lessons-learned.md) | 教训链：L1-L4 分级、结构化沉淀、48h 注入、深度评分联动 |
+| - | [教训库](lessons/) | 已沉淀的教训索引与详情（lessons-registry.yaml + LL-NNN.md） |
 | - | [脚本](scripts/) | Quality Gate 脚本、Spec 验证工具 |
 
 ---
