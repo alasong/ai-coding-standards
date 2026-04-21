@@ -451,6 +451,70 @@ Director 分发任务时，为每个 Agent 构造 prompt：
 
 ---
 
+## 第 2.8 章：IPD Phase 团队矩阵
+
+> **核心原则**：每个 Phase 不是单个 Agent 独立完成，而是多角色团队协作。每个 Phase 有固定的核心角色、可选角色、团队规模决策规则。
+
+### 2.8.1 Phase 团队组成表
+
+| Phase | 核心角色（必须） | 可选角色（按需） | Gate Checker | 产出交付件 |
+|-------|----------------|-----------------|-------------|-----------|
+| **Phase 0** 市场洞察 | Researcher（主笔） | Analyst（需求视角）、Explorer（代码库现状） | 独立 | 五看三定报告、竞品分析表、差异化定位声明 |
+| **Phase 1** 概念定义 | Analyst（主笔） | Researcher（市场验证）、Designer（用户场景） | 独立 | Kano 分类表、QFD 矩阵、JTBD 场景、价值曲线 |
+| **Phase 2** 技术规划 | Architect（主笔） | Analyst（需求验证）、Performance（预算预估） | 独立 | ADR、WBS 分解表、风险矩阵、DFX 评估报告 |
+| **P23** 方案设计+Spec | Planner（主笔） | Architect（架构适配）、Gate Checker（Quality Gate） | 独立 | 方案设计文档、Spec 文件 |
+| **Phase 3** 开发 | Coder（实现）、Reviewer（审查）、Tester（测试） | Security（安全/资金模块）、DB-Migration（DB变更）、Performance（性能敏感模块）、Designer（UI变更）、Writer（API文档） | 独立（每次迭代） | 代码、测试、Gate Report |
+| **Phase 4** 验证发布 | Tester（E2E）、Ops（部署）、Security（渗透） | Performance（压力测试）、Writer（Release Notes）、Gate Checker（综合验证） | 独立 | E2E 报告、部署报告、发布 Readiness |
+| **Phase 5** 生命周期 | Ops（监控）、Writer（文档更新） | Researcher（市场反馈）、Analyst（需求演进） | 定期审计 | SLO 报告、技术债清单、改进建议 |
+
+### 2.8.2 团队规模决策规则
+
+Director 根据变更范围自动调整团队（见 §2.4 任务复杂度矩阵）：
+
+| 变更类型 | 团队 | 示例 |
+|---------|------|------|
+| **纯代码**（不改 Spec/DB/UI） | Coder + Reviewer + Gate Checker | 修复逻辑 Bug |
+| **含数据库变更** | + DB-Migration | 新增字段、索引 |
+| **含安全/资金** | + Security（必选） | 认证流程、支付接口 |
+| **含性能敏感端点** | + Performance | 大数据量查询、实时推送 |
+| **含 UI 变更** | + Designer | 新增页面、交互调整 |
+| **含 API 契约变更** | + Writer | 新增/修改/废弃 API |
+| **含部署架构变更** | + Ops | 新增服务、容器编排调整 |
+
+### 2.8.3 Phase 间交接协议
+
+| 上游 Phase → 下游 Phase | 交接文件 | 交接 Gate | 验证者 |
+|------------------------|---------|----------|--------|
+| Phase 0 → Phase 1 | 五看三定报告、差异化定位声明 | DCP Phase 0 PASS | Gate Checker |
+| Phase 1 → Phase 2 | Kano 分类、QFD 矩阵、JTBD 场景 | DCP Phase 1 PASS | Gate Checker |
+| Phase 2 → P23 | ADR、WBS、风险矩阵 | DCP Phase 2 PASS + Solution Quality Gate | Gate Checker + Architect（独立） |
+| P23 → Phase 3 | Spec 文件、方案设计文档 | Spec Validation Gate | Gate Checker + Planner（独立） |
+| Phase 3 → Phase 4 | 代码、测试报告、安全审查报告 | 全量 Gate PASS | Gate Checker |
+| Phase 4 → Phase 5 | 发布版本、用户反馈报告 | GRTR/ADCP PASS | Ops + Gate Checker |
+
+### 2.8.4 Phase 间变更传导 [§1.6.7]
+
+当上游 Phase 产出实质变更时：
+1. Director 自动识别变更影响范围
+2. 通知下游 Phase 团队负责人
+3. 下游团队执行局部刷新（不重新做整个 Phase）
+4. 变更记录到 `ipd/phase-N/impact-log-{date}.md`
+5. Gate Checker 重新验证下游 DCP
+
+### 2.8.5 每个 Phase 的 DCP 联合参与角色
+
+| Phase | DCP 参与角色 | 职责分工 |
+|-------|------------|---------|
+| Phase 0 | Researcher（主评估）、Analyst（独立验证） | Researcher 自评 → Analyst 独立打分 → Gate Checker 裁定 |
+| Phase 1 | Analyst（主评估）、Researcher（市场验证） | Analyst 自评 → Researcher 交叉验证 → Gate Checker 裁定 |
+| Phase 2 | Architect（主评估）、Analyst（需求验证）、Performance（预算验证） | Architect 自评 → Analyst + Performance 交叉验证 → Gate Checker 裁定 |
+| P23 | Planner（主评估）、Architect（架构验证） | Planner 自评 → Architect 独立验证 → Gate Checker 裁定 |
+| Phase 3 | Coder + Reviewer + Tester + Security | 各自独立评审 → Gate Checker 汇总 |
+| Phase 4 | Tester + Ops + Security + Performance | 各自独立评审 → Gate Checker 汇总 |
+| Phase 5 | Ops + Writer | 定期审计，Gate Checker 抽检 |
+
+---
+
 ## 第 3 章：Agent SDK
 
 ### 3.1 Agent Teams 模式

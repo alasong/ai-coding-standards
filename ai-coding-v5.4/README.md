@@ -25,7 +25,24 @@
 | **必选** | `00-philosophy.md` | 规范哲学——理解规范的设计意图 |
 | 按需 | `INDEX.md` | 完整文档索引与阅读指南 |
 
-### Step 2：需求 → Spec 链（编码前必须完成）
+### Step 2：组建会诊团队
+
+每个 Phase 不是单个 Agent 独立完成，而是多角色协作。Director 根据变更类型动态组队：
+
+| Phase | 核心团队 | 产出件 |
+|-------|---------|-------|
+| Phase 0 市场洞察 | Researcher + Analyst（按需） | 五看三定、竞品分析、差异化定位 |
+| Phase 1 概念定义 | Analyst + Designer（按需） | Kano 分类、QFD 矩阵、JTBD 场景 |
+| Phase 2 技术规划 | Architect + Performance（按需） | ADR、WBS、风险矩阵、DFX |
+| 方案设计+Spec | Planner + Architect（架构适配） | 方案设计文档、Spec 文件 |
+| Phase 3 开发 | Coder + Reviewer + Tester | 代码、测试、审查报告 |
+| Phase 3 + 安全/资金模块 | + Security | 安全审查报告 |
+| Phase 3 + 数据库变更 | + DB-Migration | 迁移脚本 + 回滚策略 |
+| Phase 3 + 性能敏感 | + Performance | 性能基准报告 |
+| Phase 3 + UI 变更 | + Designer | 交互审查报告 |
+| Phase 4 验证发布 | Tester + Ops + Security | E2E、部署、渗透报告 |
+
+### Step 3：需求 → Spec 链（编码前必须完成）
 
 ```
 需求输入 → [需求分析] → [架构适配] → [方案设计] → [Spec 生成] → 编码执行
@@ -33,21 +50,22 @@
 ```
 
 1. 加载上下文：`domain-knowledge/` + `docs/architecture/` + `docs/domain-model/`
-2. 完成四阶段，每阶段过 DCP 门禁
-3. 方案通过 8 项 Quality Gate（独立 Agent 验证，非作者自评）
+2. 完成四阶段，每阶段过 DCP 门禁（独立 Agent 验证，非作者自评）
+3. 方案通过 8 项 Quality Gate（Planner + Architect 联合，Gate Checker 裁定）
 4. Spec 状态变为 `ready`，产出 `specs/F{NNN}-{name}.md`
 
-### Step 3：开发（TDD 先行）
+### Step 4：开发（TDD 先行 + 团队协作）
 
 ```
 读 Spec → 写测试 → 提交测试(CI 记录 Red) → 写实现 → 测试通过(Green) → 重构 → 全量验证
 ```
 
 - 单函数 ≤50 行，单文件 ≤200 行
+- Coder 实现 → Reviewer 幻觉检测 → Tester AC 覆盖 → Security（安全模块） → DB-Migration（DB变更）
 - 自修复最多 3 轮，第 3 轮失败转人工
 - 编码完成后执行 Skill Generalization（经验沉淀到知识库）
 
-### Step 4：代码审查（协作会诊模式）
+### Step 5：代码审查（协作会诊模式）
 
 **5 轮独立审查**，每个 Agent 独立视角：
 
@@ -89,18 +107,26 @@
 
 ### Agent 角色与动态映射
 
-| 规范角色 | Claude Code Agent |
-|----------|------------------|
-| Architect | `architect` |
-| Coder | `general-purpose` |
-| Reviewer | `code-reviewer` |
-| Security | `security-reviewer` |
-| Tester | `test-engineer` |
-| Gate Checker | `verifier` |
-| Explorer | `Explore` |
-| Planner | `Plan` |
-| Debugger | `debugger` |
-| Simplifier | `code-simplifier` |
+16 个角色覆盖 IPD Phase 0 → Phase 5 全链路：
+
+| 规范角色 | Claude Code Agent | 覆盖 Phase |
+|----------|------------------|-----------|
+| Researcher | `WebSearch` + `Explore` | Phase 0 市场洞察 |
+| Analyst | `critic` | Phase 1 概念定义 |
+| Architect | `architect` | Phase 2 技术规划 |
+| Planner | `Plan` | P23 方案设计+Spec |
+| Coder | `general-purpose` | Phase 3 开发 |
+| Reviewer | `code-reviewer` | Phase 3 审查 |
+| Tester | `test-engineer` | Phase 3/4 测试 |
+| Security | `security-reviewer` | Phase 3/4 安全 |
+| DB-Migration | `debugger` | Phase 3 DB变更 |
+| Performance | `general-purpose` | Phase 3/4 性能 |
+| Designer | `designer` | Phase 1/3 UI/UX |
+| Ops | `general-purpose` | Phase 4/5 部署运维 |
+| Writer | `writer` | Phase 4/5 文档 |
+| Gate Checker | `verifier` | 全阶段 |
+| Explorer | `Explore` | 全阶段 |
+| Director | `critic` | 全阶段编排 |
 
 完整映射见 `.normalized/agent-registry.yaml`。
 
@@ -110,13 +136,22 @@
 
 | 规则文件 | 适用角色 |
 |----------|---------|
-| `.normalized/architect-rules.md` | 架构设计、IPD 六阶段、深度评分 |
+| `.normalized/researcher-rules.md` | 市场洞察、竞品分析、伪需求检测 |
+| `.normalized/analyst-rules.md` | 概念定义、Kano、QFD、JTBD |
+| `.normalized/architect-rules.md` | Phase 2 技术规划、DFX、ATA、WBS |
+| `.normalized/planner-rules.md` | 方案设计 → Spec 生成 |
 | `.normalized/coder-rules.md` | 代码实现、TDD、工程实践 |
 | `.normalized/reviewer-rules.md` | 代码审查、幻觉检测 |
-| `.normalized/security-rules.md` | 安全扫描、密钥检测、Prompt 注入 |
+| `.normalized/security-rules.md` | 安全扫描、密钥检测、注入防护 |
 | `.normalized/tester-rules.md` | 测试策略、AC 覆盖率、Flaky Test |
+| `.normalized/db-migration-rules.md` | DB 迁移审查、数据一致性、回滚策略 |
+| `.normalized/performance-rules.md` | 性能基线、预算、N+1 检测 |
+| `.normalized/designer-rules.md` | UI/UX 交互审查、A11y |
+| `.normalized/ops-rules.md` | 部署与可观测性、SLO、回滚策略 |
+| `.normalized/writer-rules.md` | 文档质量、API 文档、CHANGELOG |
 | `.normalized/gate-checker-rules.md` | Gate 验证、证据链检查 |
 | `.normalized/explorer-rules.md` | 只读代码探索 |
+| `.normalized/director-rules.md` | 会诊编排、Gate 调度、团队组建 |
 | `.normalized/planner-rules.md` | 需求分析、方案设计、Spec 生成 |
 
 ---
