@@ -252,20 +252,24 @@ Level 0: 角色级会诊（多角色对同一产出物的多视角会诊）
 
 **规范角色层（工具无关）**：这些角色是规范定义的抽象概念，不绑定任何具体工具：
 
-| 规范角色 | 职责 |
-|---------|------|
-| `architect` | 架构设计、权衡分析 |
-| `coder` | 代码实现、调试、重构 |
-| `reviewer` | 代码审查、质量评分 |
-| `security` | 安全漏洞检测 |
-| `tester` | 测试策略、E2E、flaky 测试 |
-| `gate-checker` | 证据链验证、完成度检查 |
-| `explorer` | 只读代码搜索、分析 |
-| `planner` | 架构设计、实现规划 |
-| `debugger` | 根因分析、回归隔离 |
-| `simplifier` | 代码简化、一致性 |
-| `critic` | 深度审查、多视角分析 |
-| `writer` | 技术文档、API 文档 |
+| 规范角色 | 覆盖 IPD Phase | 职责 |
+|---------|--------------|------|
+| `researcher` | Phase 0 | 市场洞察、竞品分析、五看三定、伪需求检测 |
+| `analyst` | Phase 1 | 概念定义、需求拆解、Kano/QFD、JTBD |
+| `architect` | Phase 2 | 技术规划、DFX、ATA、WBS、风险矩阵 |
+| `planner` | P23 | 方案设计 → Spec 生成 |
+| `coder` | Phase 3 | 代码实现、调试、重构 |
+| `reviewer` | Phase 3 | 代码审查、质量评分、幻觉检测 |
+| `tester` | Phase 3/4 | 测试策略、E2E、flaky 测试 |
+| `security` | Phase 3/4 | 安全漏洞检测、密钥扫描、注入防护 |
+| `db-migration` | Phase 3 | 数据库迁移审查、数据一致性、回滚策略 |
+| `performance` | Phase 3/4 | 性能基线审查、预算、N+1 检测、压力测试 |
+| `designer` | Phase 1/3 | UI/UX 交互审查、可用性、可访问性 |
+| `ops` | Phase 4/5 | 部署与可观测性审查、健康检查、SLO |
+| `writer` | Phase 4/5 | 文档质量审查、API 文档、CHANGELOG |
+| `gate-checker` | 全阶段 | 证据链验证、Pass/Fail 判定 |
+| `explorer` | 全阶段 | 只读代码搜索、分析 |
+| `director` | 全阶段 | 会诊编排、Gate 调度、报告汇总 |
 
 **工具实现层（工具特定）**：Director 必须维护工具到角色的映射表，按工具动态切换：
 
@@ -355,14 +359,22 @@ Director Agent 执行清洗:
 
 | 文件 | 规范角色 | 来源章节 |
 |------|---------|---------|
-| `.normalized/coder-rules.md` | coder | P1-P11(核心)、P12-P22(工程)、TDD 流程、Self-Correction |
-| `.normalized/architect-rules.md` | architect | P1(商业驱动)、IPD 流程、设计启发式、架构决策 |
+| `.normalized/researcher-rules.md` | researcher | §1.6.1(Phase0)、五看三定、BLM、VOC |
+| `.normalized/analyst-rules.md` | analyst | §1.6.2(Phase1)、$APPEALS、Kano、QFD、JTBD |
+| `.normalized/architect-rules.md` | architect | §1.6.3(Phase2)、DFX、ATA、WBS、风险矩阵 |
+| `.normalized/planner-rules.md` | planner | §1.3(P23)、§4(Spec格式)、Quality Gate |
+| `.normalized/coder-rules.md` | coder | P1-P11(核心)、P12-P22(工程)、TDD、Self-Correction |
 | `.normalized/reviewer-rules.md` | reviewer | P4(人工审查)、P11(证据链)、A01-A09 审查清单 |
 | `.normalized/security-rules.md` | security | P5(密钥)、P14(租户)、P19(认证)、安全治理 |
 | `.normalized/tester-rules.md` | tester | P3(TDD)、测试深度评分、AC 覆盖规则 |
 | `.normalized/gate-checker-rules.md` | gate-checker | §1.7(Gate)、P11(证据链)、独立验证原则 |
 | `.normalized/explorer-rules.md` | explorer | 只读约束、搜索策略 |
-| `.normalized/planner-rules.md` | planner | P23(需求→Spec)、IPD 六阶段、DCP 门禁 |
+| `.normalized/db-migration-rules.md` | db-migration | 08-database-migration、TDD迁移、Expand-Contract |
+| `.normalized/performance-rules.md` | performance | 11-performance-baseline、性能预算、N+1检测 |
+| `.normalized/designer-rules.md` | designer | 交互审查、A11y、可用性、响应式 |
+| `.normalized/ops-rules.md` | ops | 13-deploy-rollback、07-observability、SLO |
+| `.normalized/writer-rules.md` | writer | 文档质量、API文档、CHANGELOG、文档即测试 |
+| `.normalized/director-rules.md` | director | §2.1-§2.7(会诊编排)、Agent映射、Gate调度 |
 
 **清洗原则：**
 
