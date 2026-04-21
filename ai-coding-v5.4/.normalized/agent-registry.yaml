@@ -1,0 +1,41 @@
+# Agent Registry
+# 不同工具的 Agent 映射到规范角色
+# Director 根据当前使用的工具查找对应的 Agent 类型
+
+roles:
+  architect:
+    claude-code: "architect"
+    # 其他工具继续添加
+
+  coder:
+    claude-code: "general-purpose"
+
+  reviewer:
+    claude-code: "code-reviewer"
+
+  security:
+    claude-code: "security-reviewer"
+
+  tester:
+    claude-code: "test-engineer"
+
+  gate-checker:
+    claude-code: "verifier"
+
+  explorer:
+    claude-code: "Explore"
+
+  planner:
+    claude-code: "Plan"
+
+  debugger:
+    claude-code: "debugger"
+
+  simplifier:
+    claude-code: "code-simplifier"
+
+  critic:
+    claude-code: "critic"
+
+  writer:
+    claude-code: "writer"
