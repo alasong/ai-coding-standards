@@ -449,6 +449,63 @@ Director 分发任务时，为每个 Agent 构造 prompt：
 5. 收集产出 → 交给 Gate Checker 验证
 ```
 
+### 2.7.7 环境限制与降级方案
+
+> **核心问题**：Agent tool 底层走的是 Anthropic 官方 API（默认 `claude-opus-4-7`），在非 Anthropic 原生环境（DashScope、Bedrock、Vertex、SiliconFlow 等）下，子 agent 模型无法正确路由，会返回 400 "model not supported" 并静默失败。
+
+#### 已知限制
+
+| 限制 | 说明 |
+|------|------|
+| **Agent tool 需要 Anthropic 原生 API** | 子 agent 默认使用 `claude-opus-4-7`，该模型仅在官方 Anthropic API 上可用 |
+| **模型参数不解决路由问题** | 即使传 `model=sonnet/opus/haiku` tier alias，底层仍然是 Anthropic API 路由，不经过第三方 provider |
+| **OMC_SUBAGENT_MODEL 仅用于引导** | pre-tool-enforcer hook 可检测不匹配并给出引导，但无法自动路由到第三方 provider |
+| **静默失败** | 子 agent 首次 API 调用失败后退出，主 agent 只看到 "went idle"，无明确错误 |
+
+#### 降级方案：直接 LLM API 会诊
+
+当 Agent tool 不可用时，使用 `phase0-consultation.py` 模式：
+
+```
+每个 Agent = 独立 LLM API 调用 + 独立 system prompt + 独立输入文件 + 独立输出文件
+
+Stage 1（并行）: Researcher + Explorer + Analyst
+  ├── 各自读取 .normalized/{role}-rules.md 获取角色规范
+  ├── 各自读取对应的 Phase 0 上下文文件
+  └── 各自写入 ipd/phase-0/{role}-output.md
+
+Stage 2（串行）: Gate Checker
+  ├── 读取所有 Stage 1 产出文件 + 原始 Phase 0 文档
+  ├── 独立验证 DCP 检查项 + 深度评分
+  └── 写入 ipd/phase-0/gate-report.md
+```
+
+**为什么这个方案满足会诊模式要求：**
+1. **独立上下文**：每个 agent = 独立 API 调用，不共享对话上下文
+2. **独立判断**：各角色通过不同 system prompt 加载不同视角的规范
+3. **文件传递**：通过文件而非上下文传递产出物
+4. **Gate 汇总**：Gate Checker 在所有上游产出完成后独立执行
+5. **符合行业实践**：MetaGPT、ChatDev、AutoGen、CrewAI 均使用此模式
+
+#### 环境变量配置
+
+会诊脚本需要的环境变量：
+
+| 变量 | 说明 | 示例 |
+|------|------|------|
+| `SILICONFLOW_API_KEY` | SiliconFlow API 密钥 | `sk-xxxx` |
+| `SILICONFLOW_API_BASE` | API 端点（可选） | `https://api.siliconflow.cn/v1` |
+| `SILICONFLOW_MODEL` | 使用的模型（可选） | `Qwen/Qwen2.5-Coder-32B-Instruct` |
+
+当其他 provider（如 DashScope）可用时，调整脚本中的 API_KEY/API_BASE/MODEL 常量即可。
+
+#### 未来切换条件
+
+当以下任一条件满足时，可从"直接 LLM API 会诊"切换回"Agent tool 会诊"：
+- [ ] DashScope 编码计划原生支持 Agent tool 子 agent 路由
+- [ ] `OMC_SUBAGENT_MODEL` 环境变量 + pre-tool-enforcer hook 实现自动模型路由
+- [ ] Agent tool 支持显式指定非 Anthropic 模型的 provider 配置
+
 ---
 
 ## 第 2.8 章：IPD Phase 团队矩阵
