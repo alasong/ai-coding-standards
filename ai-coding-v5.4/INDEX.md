@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.4：索引
+# AI Coding 规范 v5.5：索引
 
-> 版本：v5.4 | 2026-04-18
+> 版本：v5.5 | 2026-04-24
 > 定位：大规模高复杂度 Auto-Coding 规范集 — IPD 方法引擎 + 全链路交付治理
 
 ---
@@ -75,7 +75,7 @@
 
 | # | 文档 | 说明 |
 |---|------|------|
-| 07-O | [可观测性](07-observability.md) | 结构化日志、RED 指标、分布式追踪、SLO/SLA、告警、Dashboard |
+| 07B | [可观测性](07-observability.md) | 结构化日志、RED 指标、分布式追踪、SLO/SLA、告警、Dashboard |
 | 08 | [数据库迁移](08-database-migration.md) | TDD 迁移、destructive change 检测、蓝绿迁移、Expand-Contract |
 | 09 | [API 契约与版本](09-api-contracts.md) | OpenAPI 管理、契约测试、向后兼容、破坏性变更通知、版本策略 |
 | 10 | [依赖与供应链](10-dependency-management.md) | 依赖审批、漏洞 SLA、Typosquatting 检测、SBOM、供应链安全 |
@@ -92,7 +92,7 @@
 | 16 | [安全测试与混沌工程](16-security-chaos.md) | DAST、渗透测试、混沌工程、AI 安全测试、合规验证 |
 | 17 | [数据治理与国际化](17-data-governance-i18n.md) | 数据血缘、PII、GDPR、备份恢复、i18n/A11y、数据生命周期 |
 | 18 | [规范演进治理](18-spec-evolution-governance.md) | 规范生命周期、变更请求、审批矩阵、过渡期、版本管理 |
-| 19 | [Multi-Pass Review Protocol](19-multi-pass-review.md) | 每阶段 6 轮审查 × 7 Gate × 25 检查项 × 3 轮验证 = 630 次审查 |
+| 19 | [Multi-Pass Review Protocol](19-multi-pass-review.md) | 每阶段 7 Gate × 5 检查项 × 3 轮验证 × 6 Pass = 630 次验证 |
 | 20 | [Lessons Learned Protocol](20-lessons-learned.md) | 教训链：L1-L4 分级、结构化沉淀、48h 注入、深度评分联动 |
 | - | [教训库](lessons/) | 已沉淀的教训索引与详情（lessons-registry.yaml + LL-NNN.md） |
 | - | [脚本](scripts/) | Quality Gate 脚本、Spec 验证工具 |
@@ -105,7 +105,7 @@
 
 | 优先级 | 加载顺序 | 文档 | 说明 |
 |--------|---------|------|------|
-| **P0** | 首先加载 | 01-core-specification.md | 核心原则（P1-P23）、自治等级、TDD、Spec 驱动、IPD 六阶段。所有其他文档依赖本文档的定义 |
+| **P0** | 首先加载 | 01-core-specification.md | 核心原则（P1-P24）、自治等级、TDD、Spec 驱动、IPD 六阶段、全机制目录（附录 D）。所有其他文档依赖本文档的定义 |
 | **P1** | 其次加载 | 07-anti-hallucination.md | 证据链定义（P11 执行细则）、45 种幻觉类型。L2+ 审查和 Gate 依赖此文档 |
 | **P1** | 其次加载 | 06-cicd-pipeline.md | Pipeline 层级、各层 Gate 定义。L2+ 自动化执行依赖此文档 |
 | **P2** | 按需加载 | 02-auto-coding-practices.md | 自主编码模式、Prompt Chaining 等。执行阶段需要时加载 |

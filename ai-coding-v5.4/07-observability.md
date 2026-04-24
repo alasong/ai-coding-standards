@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.4：可观测性
+# AI Coding 规范 v5.5：可观测性
 
-> 版本：v5.4 | 2026-04-18
+> 版本：v5.5 | 2026-04-24
 > 定位：AI 生成代码的日志、指标、追踪规范 — 让 AI 代码自描述、可诊断、可观测
 > 前置：[01-core-specification.md](01-core-specification.md) P12-P22（工程实践原则）
 

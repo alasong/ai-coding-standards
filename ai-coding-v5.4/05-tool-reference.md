@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.4：工具参考
+# AI Coding 规范 v5.5：工具参考
 
-> 版本：v5.4 | 2026-04-17
+> 版本：v5.5 | 2026-04-24
 > 定位：CLI 命令、Settings、Hooks、Skills、配置模板
 
 ---

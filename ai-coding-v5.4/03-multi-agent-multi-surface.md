@@ -1,6 +1,6 @@
 # AI Coding 规范 v5.5：多 Agent 与多平台
 
-> 版本：v5.5 | 2026-04-21
+> 版本：v5.5 | 2026-04-24
 > 定位：Sub-Agents、Agent SDK、协作会诊模式、多平台协同的实践指南
 > 前置：必须先阅读并理解 [01-core-specification.md](01-core-specification.md)
 
@@ -87,7 +87,9 @@ TeamCreate("quality-review-{feature}")
 | **Gate 汇总** | 所有 Agent 产出必须有明确的 Pass/Fail 标准，Gate Checker 做最终裁定 |
 | **动态组建** | 不是固定 5 个全跑。小任务 2-3 个 Agent，大任务 5+ 个 |
 
-### 2.4 何时启用会诊模式
+### 2.4 何时启用会诊模式（与 Multi-Pass Review 的关系）
+
+> **说明**：本节描述会诊模式的启用条件。Multi-Pass Review 的详细数学模型（7 门 × 25 项 × 3 轮 = 630 次检查 × 6 轮审查）在 [19-multi-pass-review.md](19-multi-pass-review.md) 中定义。会诊模式是组织多角色独立审视的方式，Multi-Pass Review 是每个角色内部执行的轮次机制。
 
 | 任务复杂度 | Agent 数量 | 启用角色 | 示例 |
 |-----------|-----------|---------|------|

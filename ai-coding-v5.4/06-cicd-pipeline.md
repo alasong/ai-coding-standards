@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.4：CI/CD Pipeline
+# AI Coding 规范 v5.5：CI/CD Pipeline
 
-> 版本：v5.4 | 2026-04-18
+> 版本：v5.5 | 2026-04-24
 > 定位：大规模 Auto-Coding 的交付基础设施 — 定义 Pipeline 分层结构、质量门禁、环境晋升
 > 前置：[01-core-specification.md](01-core-specification.md) 第 2 章（TDD）、第 3 章（幻觉检测）
 
@@ -17,6 +17,8 @@
 - 多服务并行部署时缺乏统一的晋升标准
 
 **核心原则**：Pipeline 是 AI 代码进入生产的唯一通道。所有代码——无论人类编写还是 AI 生成——必须通过同一 Pipeline，且 AI 生成的代码有额外的门禁检查。
+
+**Process Profile 集成**：Pipeline 执行的层级范围由 [01-core-specification.md](01-core-specification.md) §1.6.9 定义的 Process Profile 决定。S 档仅执行 L0-L2，M 档执行 L0-L3，L/XL 档执行 L0-L5。详见 §1.6.9 的"可裁剪项"表。
 
 ### 1.2 Pipeline 分层架构
 
@@ -317,7 +319,7 @@ Phase N 完成 → DCP 决策 → [Go/No-Go]
 
 ---
 
-## 第 5 章：Artifact 与构建产物管理
+## 第 6 章：Artifact 与构建产物管理
 
 ### 5.1 Artifact 定义
 
@@ -357,7 +359,7 @@ Phase N 完成 → DCP 决策 → [Go/No-Go]
 
 ---
 
-## 第 6 章：Pipeline 配置模板
+## 第 7 章：Pipeline 配置模板
 
 ### 6.1 GitHub Actions 模板
 
@@ -526,7 +528,7 @@ pipeline:
 
 ---
 
-## 第 7 章：Pipeline 度量与持续改进
+## 第 8 章：Pipeline 度量与持续改进
 
 ### 7.1 Pipeline 核心指标
 

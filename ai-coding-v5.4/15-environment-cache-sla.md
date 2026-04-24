@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.4：环境管理、缓存策略与 Code Review SLA
+# AI Coding 规范 v5.5：环境管理、缓存策略与 Code Review SLA
 
-> 版本：v5.4 | 2026-04-18
+> 版本：v5.5 | 2026-04-24
 > 前置：[01-core-specification.md](01-core-specification.md) P1-P11、[06-cicd-pipeline.md](06-cicd-pipeline.md) L0-L5 Pipeline、[13-deploy-rollback.md](13-deploy-rollback.md) 部署策略
 
 ---
@@ -329,7 +329,7 @@ AI Reviewer 在 Human Reviewer 前完成自动审查，降低人工负载 50-70%
 
 ---
 
-## 第 5 章：环境特定的 AI 约束
+## 第 6 章：环境特定的 AI 约束
 
 ### 5.1 环境约束矩阵
 

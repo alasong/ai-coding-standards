@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.4：数据治理与国际化（i18n/A11y）
+# AI Coding 规范 v5.5：数据治理与国际化（i18n/A11y）
 
-> 版本：v5.4 | 2026-04-18
+> 版本：v5.5 | 2026-04-24
 > 定位：大规模 Auto-Coding 场景下的数据血缘、数据质量、GDPR 合规、国际化、可访问性
 > 前置：[01-core-specification.md](01-core-specification.md) P10 数据分级/P11 证据链、[04-security-governance.md](04-security-governance.md) 安全底线、[08-database-migration.md](08-database-migration.md) 数据变更管理
 

@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.4：依赖与供应链管理
+# AI Coding 规范 v5.5：依赖与供应链管理
 
-> 版本：v5.4 | 2026-04-18
+> 版本：v5.5 | 2026-04-24
 > 定位：大规模 Auto-Coding 场景下的依赖引入审批、漏洞修复、防膨胀、SBOM 与供应链安全
 > 前置：[01-core-specification.md](01-core-specification.md) P11 证据链、[04-security-governance.md](04-security-governance.md) 安全底线、[06-cicd-pipeline.md](06-cicd-pipeline.md) L3 门禁
 

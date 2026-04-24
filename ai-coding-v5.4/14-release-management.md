@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.4：发布管理
+# AI Coding 规范 v5.5：发布管理
 
-> 版本：v5.4 | 2026-04-18
+> 版本：v5.5 | 2026-04-24
 > 定位：大规模 Auto-Coding 场景下的版本控制、发布说明、变更日志、Feature Flag 发布标注、发布节奏、发布检查清单与 Hotfix 流程
 > 前置：[01-core-specification.md](01-core-specification.md) P1-P11、[06-cicd-pipeline.md](06-cicd-pipeline.md) L0-L5 Pipeline、[13-deploy-rollback.md](13-deploy-rollback.md) 部署策略与 Feature Flag
 
@@ -424,7 +424,7 @@ PR 合并到 main
 每次发布前，CI 必须自动验证以下所有条目。任一项目失败 = 发布阻断。
 
 ```
-## 发布检查清单 v5.4
+## 发布检查清单 v5.5
 
 ### 版本控制
 - [ ] 版本号符合 SemVer 扩展格式（第 2 章）

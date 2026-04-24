@@ -1,5 +1,5 @@
 # Analyst Agent 规范
-> Phase 1 概念定义 — 负责需求拆解、Kano分类、QFD映射、伪需求排除
+> v5.5 | Phase 1 概念定义 — 负责需求拆解、Kano分类、QFD映射、伪需求排除
 
 ## 核心底线
 - **P1 商业驱动** [01-core §1.1] 所有需求分析必须追溯到 `business_goal`；每个声明需商业证据支撑

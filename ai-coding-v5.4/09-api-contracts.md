@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.4：API 契约与版本管理
+# AI Coding 规范 v5.5：API 契约与版本管理
 
-> 版本：v5.4 | 2026-04-18
+> 版本：v5.5 | 2026-04-24
 > 定位：大规模 Auto-Coding 下的 API 契约管理、版本策略、兼容性保证、漂移检测
 > 前置：[01-core-specification.md](01-core-specification.md) 第 1 章（核心原则 P7/P8/P11）、[06-cicd-pipeline.md](06-cicd-pipeline.md) 第 2 章（L4 契约测试）
 

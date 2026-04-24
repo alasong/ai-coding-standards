@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.4：部署与回滚策略
+# AI Coding 规范 v5.5：部署与回滚策略
 
-> 版本：v5.4 | 2026-04-18
+> 版本：v5.5 | 2026-04-24
 > 定位：大规模 Auto-Coding 场景下的部署编排与回滚安全 — 定义部署策略、回滚机制、多服务编排、Feature Flag、数据库协调、AI 专属约束
 > 前置：[01-core-specification.md](01-core-specification.md) P1-P11、[06-cicd-pipeline.md](06-cicd-pipeline.md) L5 环境晋升、[08-database-migration.md](08-database-migration.md)
 

@@ -1,6 +1,6 @@
 # Multi-Pass Review Protocol
 
-> 版本：v5.4.1 | 2026-04-19
+> 版本：v5.4.3 | 2026-04-24
 > 定位：每个 IPD Phase 完成后的多层审查协议，确保缺陷不流入下一阶段
 > 原则：审查次数 × 结构深度 > 盲目堆次数；200 次是自动达成的结果，不是目标本身
 
@@ -23,18 +23,18 @@
 ```
 总审查次数 = Gate 数量 × 每 Gate 检查项 × Pass 数量 × 每检查项验证轮次
 
-             7        ×      5          ×    5      ×         3           =  525 次
+             7        ×      5          ×    6      ×         3           =  630 次
 ```
 
-实际有效审查次数 ≈ 525 次（远超 200，且每次有明确目标和方法）。
+实际有效审查次数 ≈ 630 次（远超 200，且每次有明确目标和方法）。
 
 ---
 
 ## 1. 审查架构
 
-### 1.1 五轮审查（5 Passes）
+### 1.1 六轮审查（6 Passes）
 
-每个 IPD Phase 产出完成后，按顺序执行 5 轮审查：
+每个 IPD Phase 产出完成后，按顺序执行 6 轮审查：
 
 | Pass | 名称 | 执行者 | 视角 | 方法 | 输出 |
 |------|------|--------|------|------|------|
@@ -43,6 +43,7 @@
 | **P3** | Adversarial Review（对抗审查） | 独立 Agent | 竞争视角 | "如果竞品看到这个文档，怎么攻击我们？" | 脆弱点清单 |
 | **P4** | Gate Checker Agent（门检查） | 独立 Gate Checker | 规范合规 | 对照 ai-coding-v5.4 规范逐条验证 | Gate Report |
 | **P5** | Human Reviewer（人工终审） | 人类 | 业务判断 | 战略对齐 + 资源可行性 + 风险接受度 | 批准/驳回/修改意见 |
+| **P6** | Depth Score（深度评分） | 独立 Agent（critic/architect） | 深度质量 | 对照 §1.6.8 各 Phase 维度 | 深度评分报告 |
 
 ### 1.2 每 Pass 的审查对象（7 个 Gate）
 
@@ -321,7 +322,7 @@ For each Gate G in [G1..G7]:
 | Pass 数量 | 6 | P1-P5 + 深度评分 |
 | **总验证次数** | **≥630** | 7 × 5 × 3 × 6 = 630 |
 
-**注**：525 > 200，自动达成。且每次验证有明确的工具、方法和通过标准。
+**注**：630 > 200，自动达成。且每次验证有明确的工具、方法和通过标准。
 
 ### 3.2 每次审查的成本
 
@@ -329,10 +330,11 @@ For each Gate G in [G1..G7]:
 |------|------|-------------|---------|
 | P1 Self-Verify | Sonnet | ~5 | 5-10 min |
 | P2 Cross-Verify | Sonnet | ~15 | 15-25 min |
-| P3 Adversarial | Opus | ~20 | 20-30 min |
+| P3 Adversarial | Sonnet/Opus | ~20 | 20-30 min |
 | P4 Gate Checker | Haiku | ~75 (25 项 × 3 轮) | 10-15 min |
 | P5 Human | 人工 | — | 15-30 min |
-| **合计** | | ~115 | 65-110 min |
+| P6 Depth Score | Opus/Sonnet | ~12 (4 维度 × 3 轮) | 10-20 min |
+| **合计** | | ~127 | 75-130 min |
 
 **成本优化**：
 - 对于低风险 Phase（如格式调整），P3 可跳过或简化为 1 个视角
@@ -352,7 +354,7 @@ For each Gate G in [G1..G7]:
 | 紧急 Hotfix（生产事故）| P3 | P1, P2, P4, P5 | 时间优先，事后补 P3 |
 | AI Coding 自修 Round 2+ | P1, P3 | P2, P4 | 自修循环内，P4 Gate 足矣 |
 
-**逃逸必须记录**：即使跳过，也在 Gate Report 中注明跳过原因和保留项。
+**逃逸条件与 Process Profile 的关系**：下表中的逃逸条件对应 [01-core-specification.md](01-core-specification.md) §1.6.9 的 Process Profile S 档。当 Feature 被定为 M/L/XL 档位时，不得触发逃逸条件跳过审查。
 
 ---
 
@@ -367,9 +369,9 @@ For each Gate G in [G1..G7]:
 
 > 完整定义：`19-multi-pass-review.md`
 
-每个 IPD Phase 产出完成后，必须执行 5 轮审查（Self-Verify → Cross-Verify → Adversarial → Gate Checker → Human Reviewer）。
+每个 IPD Phase 产出完成后，必须执行 6 轮审查（Self-Verify → Cross-Verify → Adversarial → Gate Checker → Human Reviewer → Depth Score）。
 每轮审查对 7 个 Gate 的 25 个检查项逐项进行 3 轮独立验证。
-总审查次数自动 ≥ 200（实际 525 次），不得人为削减轮次以凑数字。
+总审查次数自动 ≥ 200（实际 630 次），不得人为削减轮次以凑数字。
 
 逃逸条件：微小变更（≤5 行单文件）、纯格式变更、紧急 Hotfix 可跳过部分 Pass，
 但必须在 Gate Report 中注明原因。
@@ -380,7 +382,7 @@ For each Gate G in [G1..G7]:
 在 `ai-coding-v5.4/INDEX.md` 中新增：
 
 ```
-| 19 | [Multi-Pass Review Protocol](19-multi-pass-review.md) | 每阶段 5 轮审查 × 7 Gate × 25 检查项 × 3 轮验证 = 525 次审查 |
+| 19 | [Multi-Pass Review Protocol](19-multi-pass-review.md) | 每阶段 6 轮审查 × 7 Gate × 5 检查项 × 3 轮验证 = 630 次审查 |
 ```
 
 ---
@@ -430,4 +432,4 @@ For each Gate G in [G1..G7]:
 
 ---
 
-*本文档定义了 ai-coding 规范中的审查协议。200 次是最低要求，实际结构自动达成 525 次。重点是每次审查有明确的工具、方法和通过标准，而非单纯的数字。*
+*本文档定义了 ai-coding 规范中的审查协议。200 次是最低要求，实际结构自动达成 630 次。重点是每次审查有明确的工具、方法和通过标准，而非单纯的数字。*

@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.4：数据库迁移
+# AI Coding 规范 v5.5：数据库迁移
 
-> 版本：v5.4 | 2026-04-18
+> 版本：v5.5 | 2026-04-24
 > 定位：AI 自主修改数据库 Schema 的安全规范 — TDD、destructive change 检测、蓝绿迁移、回滚
 > 前置：[01-core-specification.md](01-core-specification.md) P3（TDD 先行）、[06-cicd-pipeline.md](06-cicd-pipeline.md)
 

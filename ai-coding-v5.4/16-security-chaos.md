@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.4：安全测试与混沌工程
+# AI Coding 规范 v5.5：安全测试与混沌工程
 
-> 版本：v5.4 | 2026-04-18
+> 版本：v5.5 | 2026-04-24
 > 定位：大规模 Auto-Coding 场景下的 DAST、渗透测试、混沌工程、AI 安全测试、合规验证
 > 前置：[01-core-specification.md](01-core-specification.md)（核心原则）、[04-security-governance.md](04-security-governance.md)（安全与治理，含提示注入防御/应急响应）、[06-cicd-pipeline.md](06-cicd-pipeline.md)（CI/CD Pipeline）
 
@@ -613,7 +613,7 @@ class GracefulDegradation:
         for level in ["D0", "D1", "D2", "D3"]:
             try:
                 result = await operation(
-                    mode=self.DEGRACTION_LEVELS[level]["mode"],
+                    mode=self.DEGRADATION_LEVELS[level]["mode"],
                     context=context
                 )
                 if result is not None:
@@ -623,7 +623,7 @@ class GracefulDegradation:
                 continue
 
         # 所有降级层级均失败
-        return self.DEGRACTION_LEVELS["D4"]
+        return self.DEGRADATION_LEVELS["D4"]
 ```
 
 ### 6.2 AI 韧性代码生成规则
@@ -676,6 +676,8 @@ resilience_checks:
 ---
 
 ## 第 7 章：综合验证矩阵
+
+> 注：L4+ = L4 集成验证层之上的动态安全层（DAST），L5+ = L5 环境晋升层之后的混沌注入层。L0-L5 定义见 [06-cicd-pipeline.md](06-cicd-pipeline.md)。
 
 ### 7.1 安全 + 韧性 + 合规验证矩阵
 

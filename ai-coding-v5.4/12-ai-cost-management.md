@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.4：成本与吞吐管理
+# AI Coding 规范 v5.5：成本与吞吐管理
 
-> 版本：v5.4 | 2026-04-18
+> 版本：v5.5 | 2026-04-24
 > 定位：大规模 Auto-Coding 场景下的 API 成本控制、模型路由、吞吐优化、ROI 度量
 > 前置：必须先阅读并理解 [01-core-specification.md](01-core-specification.md)
 

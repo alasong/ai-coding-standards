@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.4：规范演进治理
+# AI Coding 规范 v5.5：规范演进治理
 
-> 版本：v5.4 | 2026-04-18
+> 版本：v5.5 | 2026-04-24
 > 定位：规范集自身的版本管理、变更流程、生命周期、权限控制
 > 范围：ai-coding-v5.4/ 目录下所有规范文件
 > 前置：[14-release-management.md](14-release-management.md) 版本规范、[01-core-specification.md](01-core-specification.md) DCP 流程

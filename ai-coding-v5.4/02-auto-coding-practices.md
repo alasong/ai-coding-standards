@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.4：Auto-Coding 实践
+# AI Coding 规范 v5.5：Auto-Coding 实践
 
-> 版本：v5.4 | 2026-04-17
+> 版本：v5.5 | 2026-04-24
 > 定位：在安全边界内最大化自主性的实践指南
 > 前置：必须先阅读并理解 [01-core-specification.md](01-core-specification.md)
 

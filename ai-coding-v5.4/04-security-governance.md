@@ -1,6 +1,6 @@
-# AI Coding 规范 v5.4：安全与治理
+# AI Coding 规范 v5.5：安全与治理
 
-> 版本：v5.4 | 2026-04-17
+> 版本：v5.5 | 2026-04-24
 > 定位：企业级安全实现、权限管理、MCP 安全、合规审计
 > 前置：必须先阅读并理解 [01-core-specification.md](01-core-specification.md)
 
