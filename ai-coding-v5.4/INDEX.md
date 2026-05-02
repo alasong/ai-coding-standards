@@ -94,6 +94,7 @@
 | 18 | [规范演进治理](18-spec-evolution-governance.md) | 规范生命周期、变更请求、审批矩阵、过渡期、版本管理 |
 | 19 | [Multi-Pass Review Protocol](19-multi-pass-review.md) | 每阶段 7 Gate × 5 检查项 × 3 轮验证 × 6 Pass = 630 次验证 |
 | 20 | [Lessons Learned Protocol](20-lessons-learned.md) | 教训链：L1-L4 分级、结构化沉淀、48h 注入、深度评分联动 |
+| 21 | [可执行状态机](21-executable-state-machine.md) | 将声明式规范编译为可执行状态机，框架管边界+AI管内容 |
 | - | [教训库](lessons/) | 已沉淀的教训索引与详情（lessons-registry.yaml + LL-NNN.md） |
 | - | [脚本](scripts/) | Quality Gate 脚本、Spec 验证工具 |
 
@@ -108,6 +109,7 @@
 | **P0** | 首先加载 | 01-core-specification.md | 核心原则（P1-P24）、自治等级、TDD、Spec 驱动、IPD 六阶段、全机制目录（附录 D）。所有其他文档依赖本文档的定义 |
 | **P1** | 其次加载 | 07-anti-hallucination.md | 证据链定义（P11 执行细则）、45 种幻觉类型。L2+ 审查和 Gate 依赖此文档 |
 | **P1** | 其次加载 | 06-cicd-pipeline.md | Pipeline 层级、各层 Gate 定义。L2+ 自动化执行依赖此文档 |
+| **P1** | 其次加载 | 21-executable-state-machine.md | 可执行状态机，框架管边界+AI管内容。每次会话启动时加载状态上下文 |
 | **P2** | 按需加载 | 02-auto-coding-practices.md | 自主编码模式、Prompt Chaining 等。执行阶段需要时加载 |
 | **P2** | 按需加载 | 05-tool-reference.md | 工具参考、AI 审查清单（A01-A09）。审查阶段需要时加载 |
 | **P2** | 按需加载 | 03-multi-agent-multi-surface.md | 多 Agent 协调。团队协作场景需要时加载 |

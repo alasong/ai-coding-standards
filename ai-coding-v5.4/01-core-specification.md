@@ -33,6 +33,7 @@
 | 05 | 工具参考 | CLI 参考、Settings、Hooks、Skills、配置模板 |
 | 07 | 反幻觉方案 | 45 种幻觉类型、证据链方法论、检测与防护方案 |
 | 18 | 规范演进治理 | 规范生命周期、变更请求、审批矩阵、过渡期、版本管理 |
+| 21 | **可执行状态机** | 将声明式规范编译为可执行状态机，框架管边界+AI管内容 |
 
 ---
 
@@ -185,6 +186,8 @@ P12-P22 通过四层机制自动拦截，不是靠 AI 自觉：
 | L4 Runtime | 代码防护 | `writeJSON` 返回 500 | 强——运行时兜底 |
 
 **规则**：每条原则至少 L1 + L2/L3/L4 之一。只有 L1 的视为"未落地"。
+
+> 多层执行机制的可执行化实现：见 [21-executable-state-machine.md](21-executable-state-machine.md)。规范中的每条原则通过状态机的 enter/exit conditions 进行硬验证，不再仅依赖 AI 自觉。
 
 ### 1.3 P23：需求→Spec 链
 
@@ -816,6 +819,7 @@ Decision Point：DP0 需求 → DP0.5 架构 → DP0.7 方案 → DP1 理解 →
 | v5.2 | 2026-04-17 | P23 方案设计驱动、DP0/DP0.5/DP0.7、Context Loading Gate、Solution Quality Gate、Skill Generalization |
 | **v5.4** | **2026-04-18** | **IPD 六阶段方法引擎：五看三定/BLM/$APPEALS/Kano/QFD/DFX/ATA/E2E/技术债管理** |
 | **v5.5** | **2026-04-24** | **Phase 4/5 方法论扩充、45 种幻觉类型补全、lessons/ 目录创建、Process Profile 跨文档集成、关键特性深度分级、全链路断链修复** |
+| **v5.6** | **2026-05-02** | **可执行状态机（21-executable-state-machine.md）：框架管边界+AI管内容，将声明式规范编译为可执行状态机** |
 
 ---
 
@@ -874,6 +878,7 @@ Decision Point：DP0 需求 → DP0.5 架构 → DP0.7 方案 → DP1 理解 →
 | **Pipeline 链** | L0 → L1 → L2 → L3 → L4 → L5 | 分层门禁 | 06-cicd-pipeline |
 | **审查链** | P1 Self-Verify → P2 Cross-Verify → P3 Adversarial → P4 Gate Checker → P5 Human → P6 Depth Score | 630 次验证 | 19-multi-pass |
 | **教训链** | 发现→记录→注入→引用→验证→清理 | L1-L4 分级 | 20-lessons-learned |
+| **状态机链** | 状态 enter → AI 执行 → exit 验证 → 状态转换 | 自动化验证 + 独立 Agent | 21-executable-state-machine |
 
 ### D.5 决策点体系（DP + DCP）
 
@@ -893,6 +898,7 @@ Decision Point：DP0 需求 → DP0.5 架构 → DP0.7 方案 → DP1 理解 →
 | L2 Pre-commit | Git hook | 强 | §1.2.1 |
 | L3 CI Gate | CI 门禁 | 强 | §1.2.1 |
 | L4 Runtime | 代码防护 | 强 | §1.2.1 |
+| **L5 状态机边界** | enter/exit condition 验证 | 强——不通过不转换 | 21-executable-state-machine |
 | 幻觉防护 | Example-Driven + Prompt Chaining + Progressive Disclosure + 两层审查 | 拦截率 100% | §3.2 |
 | 45 种幻觉检测 | 8 大类（E/X/V/L/D/C/S/H） | 证据链验证 | 07-anti-hallucination §1 |
 

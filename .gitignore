@@ -6,3 +6,7 @@ __pycache__/
 # OMC state files
 .omc/
 ai-coding/.omc/
+
+# IPD state machine
+.ipd/state.json
+.ipd/blocked.json
