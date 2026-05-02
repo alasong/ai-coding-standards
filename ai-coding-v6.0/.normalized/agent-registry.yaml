@@ -1,0 +1,66 @@
+# Agent Registry
+# 不同工具的 Agent 映射到规范角色
+# Director 根据当前使用的工具查找对应的 Agent 类型
+
+roles:
+  # IPD Phase 0-2 前端角色
+  researcher:
+    claude-code: "Explore" + "WebSearch" (只读+搜索)
+    # Phase 0: 市场洞察、竞品分析、五看三定
+
+  analyst:
+    claude-code: "critic" (深度分析)
+    # Phase 1: 概念定义、需求拆解、Kano/QFD
+
+  architect:
+    claude-code: "architect" (OMC)
+    # Phase 2: 技术规划、DFX、ATA、WBS、风险矩阵
+
+  planner:
+    claude-code: "Plan" (方案设计)
+    # P23: 方案设计 → Spec 生成
+
+  # Phase 3 开发角色
+  coder:
+    claude-code: "general-purpose" (CC 内置)
+
+  reviewer:
+    claude-code: "code-reviewer" (OMC)
+
+  tester:
+    claude-code: "test-engineer" (OMC)
+
+  security:
+    claude-code: "security-reviewer" (OMC)
+
+  # 专项质量角色
+  db-migration:
+    claude-code: "debugger" (根因分析 + 数据一致性)
+    # 数据库迁移审查
+
+  performance:
+    claude-code: "general-purpose" + 性能工具
+    # 性能基线审查
+
+  designer:
+    claude-code: "designer" (OMC)
+    # UI/UX 交互审查
+
+  ops:
+    claude-code: "general-purpose" (部署/运维视角)
+    # 部署与可观测性审查
+
+  writer:
+    claude-code: "writer" (OMC)
+    # 文档质量审查
+
+  # 跨阶段角色
+  gate-checker:
+    claude-code: "verifier" (OMC)
+
+  explorer:
+    claude-code: "Explore" (CC 内置)
+
+  director:
+    claude-code: "critic" (编排调度)
+    # 会诊团队组建、Gate 调度、报告汇总

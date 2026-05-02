@@ -1,0 +1,57 @@
+# Lessons Learned Registry
+# Format: lessons-registry.yaml
+# Status: open | verified | archived
+# Type: L1 设计盲区 | L2 执行偏差 | L3 规范缺陷 | L4 系统性风险
+# Phase: P0 | P1 | P2 | P3 | P4 | P5
+
+version: 1.0
+updated: 2026-04-24
+
+lessons:
+  - id: LL-001
+    title: "泛化引擎不能只做别名扩展"
+    status: open
+    type: L1 设计盲区
+    phase: P2
+    module: "泛化引擎"
+    summary: "泛化引擎设计时，仅做别名扩展无法覆盖用户输入中的结构化参数（时间/地点/关系）提取。需要实体识别维度。"
+    discovered_in: "F015"
+    injected_into: "01-core-specification.md §1.6.2（Phase 2 详细规划）"
+    date: "2026-04-19"
+    tags: ["泛化", "实体提取", "架构设计"]
+
+  - LL-002
+    title: "竞品分析必须拆解机制，不仅是功能对照"
+    status: verified
+    type: L1 设计盲区
+    phase: P0
+    module: "市场洞察"
+    summary: "初期竞品分析只做功能有无对照表，未拆解竞品的实现机制和设计动机，导致差异化定位缺乏技术依据。"
+    discovered_in: "F015-P0"
+    injected_into: "01-core-specification.md §1.6.1（Phase 0 市场洞察）"
+    date: "2026-04-19"
+    tags: ["竞品分析", "机制拆解", "差异化定位"]
+
+  - LL-003
+    title: "性能退化不可由 AI 自行修复"
+    status: verified
+    type: L2 执行偏差
+    phase: P3
+    module: "CI/CD Pipeline"
+    summary: "AI 倾向于自行优化性能退化后重新提交，但这掩盖了根因。必须由人工分析根因后再修复。"
+    discovered_in: "11-performance-baseline.md 审查"
+    injected_into: "06-cicd-pipeline.md §4.1、11-performance-baseline.md §4.5"
+    date: "2026-04-24"
+    tags: ["性能", "自修", "人工分析"]
+
+  - LL-004
+    title: "审查协议需防范模型不可用风险"
+    status: verified
+    type: L3 规范缺陷
+    phase: P3
+    module: "审查流程"
+    summary: "审查协议中推荐单一模型（如 Opus），当模型不可用时流程中断。应提供降级方案（Sonnet/Opus）。"
+    discovered_in: "19-multi-pass-review.md 审查"
+    injected_into: "19-multi-pass-review.md §2.3"
+    date: "2026-04-24"
+    tags: ["审查", "模型降级", "可用性"]
