@@ -115,6 +115,42 @@ DEFAULT_CONFIG = {
             "exit_conditions": [
                 {"type": "file_exists", "path": "ipd/phase-3/task-queue.json"},
             ],
+            "next_states": ["SCFS_BOOT"],
+        },
+        "SCFS_BOOT": {
+            "description": "SCFS 启动 — 创建 State Manifest，读取 Agent Manifest",
+            "permissions": {
+                "allow": ["read", "write_docs"],
+                "deny": ["write_code", "edit_tests"],
+                "scope": [".omc/state/"],
+            },
+            "exit_conditions": [
+                {"type": "scfs_state_file_exists"},
+            ],
+            "next_states": ["SCFS_CONTRACT"],
+        },
+        "SCFS_CONTRACT": {
+            "description": "SCFS 合同读取 — 读取 Task Contract，解析约束",
+            "permissions": {
+                "allow": ["read", "write_docs"],
+                "deny": ["write_code", "edit_tests"],
+                "scope": [".omc/state/", ".omc/tasks/"],
+            },
+            "exit_conditions": [
+                {"type": "scfs_contract_read"},
+            ],
+            "next_states": ["SCFS_UPSTREAM"],
+        },
+        "SCFS_UPSTREAM": {
+            "description": "SCFS 上游上下文加载 — 读取 context_files",
+            "permissions": {
+                "allow": ["read", "write_docs"],
+                "deny": ["write_code", "edit_tests"],
+                "scope": [".omc/state/", ".omc/context/"],
+            },
+            "exit_conditions": [
+                {"type": "scfs_upstream_loaded"},
+            ],
             "next_states": ["TDD_RED"],
         },
         "TDD_RED": {
@@ -164,10 +200,34 @@ DEFAULT_CONFIG = {
             "exit_conditions": [
                 {"type": "spec_align_pass"},
             ],
+            "next_states": ["SCFS_GATE_REQUEST"],
+        },
+        "SCFS_GATE_REQUEST": {
+            "description": "SCFS 请求门禁 — 更新 State Manifest 标记请求门禁",
+            "permissions": {
+                "allow": ["read", "write_docs"],
+                "deny": ["write_code", "edit_tests"],
+                "scope": [".omc/state/"],
+            },
+            "exit_conditions": [
+                {"type": "scfs_gate_requested"},
+            ],
+            "next_states": ["SCFS_WAITING"],
+        },
+        "SCFS_WAITING": {
+            "description": "SCFS 等待门禁结果 — 不再执行任何操作",
+            "permissions": {
+                "allow": ["read"],
+                "deny": ["write_code", "edit_tests", "write_docs"],
+                "scope": [],
+            },
+            "exit_conditions": [
+                {"type": "scfs_gate_report_exists"},
+            ],
             "next_states": ["TASK_GATE"],
         },
         "TASK_GATE": {
-            "description": "任务 Gate — 幻觉检测 + 安全检查",
+            "description": "任务 Gate — 幻觉检测 + 安全检查 + SCFS 边界验证",
             "permissions": {
                 "allow": ["read"],
                 "deny": ["write_code", "edit_tests", "write_docs"],
@@ -175,6 +235,7 @@ DEFAULT_CONFIG = {
             },
             "exit_conditions": [
                 {"type": "gate_report_pass"},
+                {"type": "scfs_boundary_check"},
             ],
             "next_states": ["NEXT_TASK_OR_PHASE_3_COMPLETE"],
         },
@@ -481,6 +542,18 @@ class StateMachine:
             return self._check_all_tests_pass(cond)
         elif cond_type == "gate_report_exists":
             return self._check_gate_report_exists(cond)
+        elif cond_type == "scfs_state_file_exists":
+            return self._check_scfs_state_file_exists(cond)
+        elif cond_type == "scfs_contract_read":
+            return self._check_scfs_contract_read(cond)
+        elif cond_type == "scfs_upstream_loaded":
+            return self._check_scfs_upstream_loaded(cond)
+        elif cond_type == "scfs_gate_requested":
+            return self._check_scfs_gate_requested(cond)
+        elif cond_type == "scfs_gate_report_exists":
+            return self._check_scfs_gate_report_exists(cond)
+        elif cond_type == "scfs_boundary_check":
+            return self._check_scfs_boundary_check(cond)
         else:
             return ValidationResult(
                 passed=False,
@@ -760,7 +833,246 @@ class StateMachine:
             detail="文件不存在",
         )
 
+    # -- SCFS 条件验证 --------------------------------------------------------
+    def _check_scfs_state_file_exists(self, cond: dict) -> ValidationResult:
+        """检查 State Manifest 文件是否存在且包含 current_phase"""
+        task_id = self._current_task_id()
+        if not task_id:
+            return ValidationResult(
+                passed=False,
+                description="scfs_state_file_exists",
+                detail="当前没有活跃的 task",
+            )
+        state_path = PROJECT_ROOT / f".omc/state/{task_id}.json"
+        if not state_path.exists():
+            return ValidationResult(
+                passed=False,
+                description="scfs_state_file_exists",
+                detail=f"文件不存在: {state_path}",
+            )
+        try:
+            data = json.loads(state_path.read_text())
+            if "current_phase" in data.get("state", data):
+                return ValidationResult(
+                    passed=True,
+                    description=f"scfs_state_file_exists: {task_id}.json",
+                )
+            return ValidationResult(
+                passed=False,
+                description="scfs_state_file_exists",
+                detail="文件存在但缺少 current_phase 字段",
+            )
+        except json.JSONDecodeError:
+            return ValidationResult(
+                passed=False,
+                description="scfs_state_file_exists",
+                detail="JSON 格式错误",
+            )
+
+    def _check_scfs_contract_read(self, cond: dict) -> ValidationResult:
+        """检查 State Manifest 是否记录了 contract 读取完成"""
+        return self._check_phase_transition("reading_contract", "scfs_contract_read")
+
+    def _check_scfs_upstream_loaded(self, cond: dict) -> ValidationResult:
+        """检查 State Manifest 是否记录了 upstream context 加载完成"""
+        return self._check_phase_transition("reading_upstream", "scfs_upstream_loaded")
+
+    def _check_scfs_gate_requested(self, cond: dict) -> ValidationResult:
+        """检查 State Manifest 的 gate_status 是否为 requesting_gate"""
+        task_id = self._current_task_id()
+        if not task_id:
+            return ValidationResult(
+                passed=False,
+                description="scfs_gate_requested",
+                detail="当前没有活跃的 task",
+            )
+        state_path = PROJECT_ROOT / f".omc/state/{task_id}.json"
+        if not state_path.exists():
+            return ValidationResult(
+                passed=False,
+                description="scfs_gate_requested",
+                detail=f"State Manifest 不存在",
+            )
+        try:
+            data = json.loads(state_path.read_text())
+            state = data.get("state", data)
+            gate_status = state.get("gate_status", "")
+            if gate_status == "requesting_gate":
+                return ValidationResult(
+                    passed=True,
+                    description="scfs_gate_requested",
+                )
+            return ValidationResult(
+                passed=False,
+                description="scfs_gate_requested",
+                detail=f"gate_status = '{gate_status}'，期望 'requesting_gate'",
+            )
+        except json.JSONDecodeError:
+            return ValidationResult(
+                passed=False,
+                description="scfs_gate_requested",
+                detail="JSON 格式错误",
+            )
+
+    def _check_scfs_gate_report_exists(self, cond: dict) -> ValidationResult:
+        """检查 Gate Report 文件是否存在"""
+        task_id = self._current_task_id()
+        if not task_id:
+            return ValidationResult(
+                passed=False,
+                description="scfs_gate_report_exists",
+                detail="当前没有活跃的 task",
+            )
+        gate_path = PROJECT_ROOT / f".gate/gate-{task_id}.json"
+        if gate_path.exists():
+            return ValidationResult(
+                passed=True,
+                description=f"scfs_gate_report_exists: gate-{task_id}.json",
+            )
+        return ValidationResult(
+            passed=False,
+            description="scfs_gate_report_exists",
+            detail=f"文件不存在: {gate_path}",
+        )
+
+    def _check_scfs_boundary_check(self, cond: dict) -> ValidationResult:
+        """对比 State Manifest 的 files_modified vs Task Contract 的 boundary_constraints"""
+        task_id = self._current_task_id()
+        if not task_id:
+            return ValidationResult(
+                passed=False,
+                description="scfs_boundary_check",
+                detail="当前没有活跃的 task",
+            )
+
+        # 读取 State Manifest
+        state_path = PROJECT_ROOT / f".omc/state/{task_id}.json"
+        if not state_path.exists():
+            return ValidationResult(
+                passed=False,
+                description="scfs_boundary_check",
+                detail="State Manifest 不存在",
+            )
+        try:
+            state_data = json.loads(state_path.read_text())
+            state = state_data.get("state", state_data)
+        except json.JSONDecodeError:
+            return ValidationResult(
+                passed=False,
+                description="scfs_boundary_check",
+                detail="State Manifest JSON 格式错误",
+            )
+
+        # 读取 Task Contract
+        task_path = PROJECT_ROOT / f".omc/tasks/{task_id}.yaml"
+        if not task_path.exists():
+            # 尝试 JSON 格式
+            task_path = PROJECT_ROOT / f".omc/tasks/{task_id}.json"
+        if not task_path.exists():
+            return ValidationResult(
+                passed=False,
+                description="scfs_boundary_check",
+                detail=f"Task Contract 不存在: {task_path}",
+            )
+
+        # 读取 boundary_constraints
+        try:
+            if task_path.suffix == ".yaml":
+                import yaml
+                with open(task_path) as f:
+                    task_data = yaml.safe_load(f)
+                boundary = task_data.get("task", {}).get("boundary_constraints", {})
+            else:
+                task_data = json.loads(task_path.read_text())
+                boundary = task_data.get("task", {}).get("boundary_constraints", {})
+        except Exception as e:
+            return ValidationResult(
+                passed=False,
+                description="scfs_boundary_check",
+                detail=f"无法解析 Task Contract: {e}",
+            )
+
+        # 执行边界检查
+        files_modified = state.get("files_modified", [])
+        violations = []
+
+        max_files = boundary.get("max_files_touched", float("inf"))
+        if len(files_modified) > max_files:
+            violations.append(f"files_touched={len(files_modified)} > max={max_files}")
+
+        total_added = sum(f.get("lines_added", 0) for f in files_modified)
+        max_lines = boundary.get("max_new_code_lines", float("inf"))
+        if total_added > max_lines:
+            violations.append(f"new_code_lines={total_added} > max={max_lines}")
+
+        # 检查 forbidden patterns
+        forbidden = boundary.get("forbidden_file_patterns", [])
+        for f in files_modified:
+            fpath = f.get("path", "")
+            for pattern in forbidden:
+                import fnmatch
+                if fnmatch.fnmatch(fpath, pattern):
+                    violations.append(f"forbidden file: {fpath} matches {pattern}")
+
+        if violations:
+            return ValidationResult(
+                passed=False,
+                description="scfs_boundary_check",
+                detail="; ".join(violations),
+            )
+
+        return ValidationResult(
+            passed=True,
+            description="scfs_boundary_check",
+        )
+
+    def _check_phase_transition(self, phase_name: str, desc: str) -> ValidationResult:
+        """检查 State Manifest 的 phase_transitions 中是否包含指定阶段"""
+        task_id = self._current_task_id()
+        if not task_id:
+            return ValidationResult(
+                passed=False,
+                description=desc,
+                detail="当前没有活跃的 task",
+            )
+        state_path = PROJECT_ROOT / f".omc/state/{task_id}.json"
+        if not state_path.exists():
+            return ValidationResult(
+                passed=False,
+                description=desc,
+                detail="State Manifest 不存在",
+            )
+        try:
+            data = json.loads(state_path.read_text())
+            state = data.get("state", data)
+            transitions = state.get("phase_transitions", [])
+            for t in transitions:
+                if t.get("to") == phase_name:
+                    return ValidationResult(
+                        passed=True,
+                        description=desc,
+                    )
+            return ValidationResult(
+                passed=False,
+                description=desc,
+                detail=f"未找到 phase_transition '{phase_name}'",
+            )
+        except json.JSONDecodeError:
+            return ValidationResult(
+                passed=False,
+                description=desc,
+                detail="JSON 格式错误",
+            )
+
     # -- 辅助 ----------------------------------------------------------------
+    def _current_task_id(self) -> Optional[str]:
+        """从 state.json 中获取当前 task_id"""
+        task_queue = self.state.get("task_queue", [])
+        current_idx = self.state.get("current_task_index", -1)
+        if 0 <= current_idx < len(task_queue):
+            return task_queue[current_idx].get("task_id")
+        return None
+
     def _resolve_task_next(self) -> str:
         """处理 NEXT_TASK_OR_PHASE_3_COMPLETE 特殊逻辑"""
         task_queue = self.state.get("task_queue", [])

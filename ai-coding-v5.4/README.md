@@ -180,6 +180,7 @@ P18 JSON ── P19 认证 ── P20 速率 ── P21 数据 ── P22 IP
 | 02 | [Auto-Coding 实践](02-auto-coding-practices.md) | 自主编码、夜间开发、自修复 CI |
 | 03 | [多 Agent 与多平台](03-multi-agent-multi-surface.md) | 协作会诊、Sub-Agents、多平台协同 |
 | 04 | [安全与治理](04-security-governance.md) | 企业部署、权限、MCP 安全 |
+| 04B | [结构化约束文件系统](04B-structured-constraints.md) | 多 Agent 编排约束、任务合同、升级协议 |
 | 05 | [工具参考](05-tool-reference.md) | CLI、Hooks、Skills、审查清单 |
 | 06 | [CI/CD Pipeline](06-cicd-pipeline.md) | L0-L5 分层、质量门禁 |
 | 07 | [反幻觉方案](07-anti-hallucination.md) | 45 种幻觉、证据链方法论 |

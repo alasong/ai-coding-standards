@@ -67,6 +67,7 @@
 | 02 | [Auto-Coding 实践](02-auto-coding-practices.md) | 自主编码模式、定时任务、夜间开发、自修复 CI、Supervisor-Worker |
 | 03 | [多 Agent 与多平台](03-multi-agent-multi-surface.md) | Sub-Agents、Agent SDK、多平台协同、冲突解决、并行度控制 |
 | 04 | [安全与治理](04-security-governance.md) | 企业部署、权限管理、MCP 安全、合规、审计 |
+| 04B | [结构化约束文件系统](04B-structured-constraints.md) | 多 Agent 编排约束、任务合同、Agent 清单、升级协议、门禁验证 |
 | 05 | [工具参考](05-tool-reference.md) | CLI 参考、Settings、Hooks、Skills、配置模板、审查清单 |
 | 06 | [CI/CD Pipeline](06-cicd-pipeline.md) | L0-L5 分层结构、质量门禁、Self-Correction、环境晋升、Artifact 管理 |
 | 07 | [反幻觉方案](07-anti-hallucination.md) | 45 种幻觉类型、证据链方法论、检测与防护 |
@@ -112,6 +113,7 @@
 | **P1** | 其次加载 | 21-executable-state-machine.md | 可执行状态机，框架管边界+AI管内容。每次会话启动时加载状态上下文 |
 | **P2** | 按需加载 | 02-auto-coding-practices.md | 自主编码模式、Prompt Chaining 等。执行阶段需要时加载 |
 | **P2** | 按需加载 | 05-tool-reference.md | 工具参考、AI 审查清单（A01-A09）。审查阶段需要时加载 |
+| **P2** | 按需加载 | 04B-structured-constraints.md | 结构化约束文件系统。多 Agent 编排场景需要时加载 |
 | **P2** | 按需加载 | 03-multi-agent-multi-surface.md | 多 Agent 协调。团队协作场景需要时加载 |
 | **P3** | 专项加载 | 08-18 专项文档 | 按任务类型加载：部署→13/14、数据库→08、API→09、安全→04/16 等 |
 
