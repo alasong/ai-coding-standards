@@ -10,3 +10,4 @@ ai-coding/.omc/
 # IPD state machine
 .ipd/state.json
 .ipd/blocked.json
+.ipd/
