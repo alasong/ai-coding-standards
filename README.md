@@ -9,6 +9,74 @@
 3. 阅读 [01-core](ai-coding-v6.0/01-core.md) 理解 24 条原则和 IPD 方法引擎
 4. 按需查阅配套文档
 
+## 使用方法
+
+### 场景 1：新项目从零开始（完整 IPD 流程）
+
+```bash
+# 第一步：初始化 .ipd/ 状态机目录
+python3 ai-coding-v6.0/scripts/ipd-sm.py init
+
+# 第二步：进入 Phase 0 市场洞察
+# 填写 ipd/phase-0/01-market-insight.md（五看三定）
+# 运行 Phase 0 会诊模式（需要 SILICONFLOW_API_KEY）
+export SILICONFLOW_API_KEY="your-key"
+python3 ai-coding-v6.0/scripts/phase0-consultation.py
+
+# 第三步：状态机推进
+python3 ai-coding-v6.0/scripts/ipd-sm.py next
+
+# 第四步：Phase 1 概念定义
+python3 ai-coding-v6.0/scripts/phase1-consultation.py
+
+# 第五步：继续推进到 Phase 3 开发
+# 创建 Spec 文件 → TDD 开发 → Gate 检查 → PR
+```
+
+### 场景 2：现有项目中的功能开发（跳过 Phase 0/1）
+
+```bash
+# 直接初始化状态机并跳转到 Phase 3
+python3 ai-coding-v6.0/scripts/ipd-sm.py init
+python3 ai-coding-v6.0/scripts/ipd-sm.py reset PHASE_3_DEVELOP
+
+# 创建 Feature Spec
+# specs/F001-feature-name.md
+# 包含：YAML frontmatter + 用户故事 + Gherkin 验收标准
+
+# 开发前做 Gate 检查
+python3 ai-coding-v6.0/scripts/gate-check.py
+
+# 完成开发后创建 PR
+python3 ai-coding-v6.0/scripts/ipd-sm.py next  # → PR_CREATE
+```
+
+### 状态机命令（ipd-sm.py）
+
+| 命令 | 作用 |
+|------|------|
+| `python3 ai-coding-v6.0/scripts/ipd-sm.py init` | 初始化 .ipd/ 目录和初始文件 |
+| `python3 ai-coding-v6.0/scripts/ipd-sm.py status` | 查看当前状态 |
+| `python3 ai-coding-v6.0/scripts/ipd-sm.py verify` | 验证 exit conditions |
+| `python3 ai-coding-v6.0/scripts/ipd-sm.py next` | 转换到下一个状态 |
+| `python3 ai-coding-v6.0/scripts/ipd-sm.py reset STATE` | 重置到指定状态 |
+| `python3 ai-coding-v6.0/scripts/ipd-sm.py history` | 查看状态历史 |
+
+### 会诊脚本
+
+| 脚本 | 场景 | 依赖 |
+|------|------|------|
+| `phase0-consultation.py` | Phase 0 三角色并行 + Gate Checker | `SILICONFLOW_API_KEY` |
+| `phase1-consultation.py` | Phase 1 三角色并行 + Gate Checker | `SILICONFLOW_API_KEY` |
+| `gate-check.py` | Gate 门禁检查 | 无 |
+
+### 在 Claude Code 中使用
+
+1. 将此仓库 clone 到你的项目同级目录
+2. 复制 `ai-coding-v6.0/.normalized/{role}-rules.md` 到你的项目的 `.claude/agents/` 目录
+3. 按照场景 1 或场景 2 的流程开始开发
+4. 所有原则（P1-P24）在编码时自动生效，通过 CLAUDE.md 加载
+
 ## Document Structure
 
 | 优先级 | 文档 | 说明 |
