@@ -4,31 +4,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This repository contains **AI Coding Standards v5.4/v5.5** — a comprehensive specification for large-scale, high-complexity auto-coding using IPD (Integrated Product Development) methodology. It is a documentation/specification repository, not an application codebase.
+This repository contains **AI Coding Standards v6.0** — a comprehensive specification for large-scale, high-complexity auto-coding using IPD (Integrated Product Development) methodology. It is a documentation/specification repository, not an application codebase.
 
-All specifications live under `ai-coding-v5.4/`.
+All specifications live under `ai-coding-v6.0/`.
 
 ## Document Loading Order
 
-When working with this spec, load documents in this priority order:
+Load documents in this priority order:
 
 | Priority | Document | Purpose |
 |----------|----------|---------|
-| **P0** | `ai-coding-v5.4/01-core-specification.md` | 23 core principles (P1-P23), autonomy levels (L1-L4), IPD six-phase engine, TDD, Spec-driven dev |
-| **P1** | `ai-coding-v5.4/07-anti-hallucination.md` | 45 hallucination types, evidence chain methodology |
-| **P1** | `ai-coding-v5.4/06-cicd-pipeline.md` | Layered pipeline (L0-L5), quality gates, environment promotion |
-| **P2** | `ai-coding-v5.4/03-multi-agent-multi-surface.md` | Sub-agents, consultation mode, multi-agent coordination |
-| **P2** | `ai-coding-v5.4/02-auto-coding-practices.md` | Auto-coding patterns, night development, self-healing CI |
-| **P2** | `ai-coding-v5.4/05-tool-reference.md` | CLI reference, settings, hooks, skills, review checklists (A01-A09) |
-| **P3** | `ai-coding-v5.4/08-18` specialty docs | Load by task type: deploy→13/14, DB→08, API→09, security→04/16 |
+| **P0** | `ai-coding-v6.0/01-core.md` | P1-P24, L1-L4, IPD 六阶段, TDD, Spec 驱动, 幻觉防护 |
+| **P0** | `ai-coding-v6.0/02-state-machine.md` | IPD 宏状态 + SCFS 微状态, YAML 配置, CLI |
+| **P1** | `ai-coding-v6.0/03-structured-constraints.md` | 6 种约束文件, Agent 生命周期 |
+| **P1** | `ai-coding-v6.0/04-multi-agent.md` | Agent 角色, 会诊模式, 团队矩阵 |
+| **P2** | `ai-coding-v6.0/05-cicd-pipeline.md` | L0-L5 分层门禁, Kill Switch, 自修复 CI |
+| **P2** | `ai-coding-v6.0/06-security-governance.md` | 安全基线, 依赖治理, 混沌工程 |
+| **P2** | `ai-coding-v6.0/07-specialized.md` | DB 迁移, API 契约, 性能, 部署, 发布 |
+| **P3** | `ai-coding-v6.0/08-operations.md` | 可观测性, 环境, 缓存, 数据治理, i18n |
+| **P3** | `ai-coding-v6.0/09-cost-management.md` | Token 预算, 模型路由 |
+| **P3** | `ai-coding-v6.0/10-spec-evolution.md` | Spec 生命周期, 版本管理 |
 
-Full index: `ai-coding-v5.4/INDEX.md`
+Full index: `ai-coding-v6.0/INDEX.md`
 
 ## Core Principles Summary
 
 - **P1-P11** (non-negotiable): Business-driven, DCP gates, TDD first, human review, no secrets, single source of truth, spec-driven, small batch, prompt versioning, data classification, evidence chain
 - **P12-P22** (engineering): Environment consistency, error handling, tenant isolation, concurrency safety, resource cleanup, input validation, JSON safety, auth on writes, rate limiting, data consistency, no IP exposure
-- **P23**: Requirement → Solution → Spec chain (mandatory before any coding)
+- **P23**: Requirement → Solution → Spec chain
+- **P24**: Standard library first
 
 ## Autonomy Levels
 
@@ -57,9 +61,7 @@ Two orthogonal dimensions control execution:
 | **L** | Phase 0→3 | 2 | 3-10 Specs / architecture changes |
 | **XL** | Phase 0→4 + Phase 5 | 3+ | 10+ Specs / platform-level / production release |
 
-**Non-negotiable at any profile**: P1-P11 core principles, P12-P22 engineering practices, TDD (P3), security baseline (P5/P17/P19).
-
-**Example**: L4 autonomy + S profile = fully automated tiny fix. L4 + XL = fully automated platform refactor.
+**Non-negotiable at any profile**: P1-P11, P12-P22, TDD (P3), security baseline (P5/P17/P19).
 
 ## TDD Protocol
 
@@ -72,19 +74,26 @@ Red → Green → Refactor. Tests must be written first and must fail before imp
 - Use `.normalized/{role}-rules.md` for agent-specific distilled rules
 - Agent registry mapping in `.normalized/agent-registry.yaml`
 
+## State Machine
+
+IPD macro states + SCFS micro states control all agent permissions via `ai-coding-v6.0/scripts/ipd-sm.py`:
+- 18 states total: IDLE → PHASE_0 → PHASE_1 → PHASE_2 → PHASE_2.5 → PHASE_3_DISPATCH → SCFS_BOOT → [TDD loop] → TASK_GATE → PR_CREATE → IDLE
+- Each state has explicit permissions (allow/deny/scope) and exit conditions
+
 ## Key Directories
 
 | Path | Purpose |
 |------|---------|
-| `ai-coding-v5.4/.normalized/` | Distilled agent rules per role (tool-agnostic instruction sets) |
-| `ai-coding-v5.4/scripts/` | Quality gate scripts and spec validation tools |
-| `ai-coding-v5.4/templates/` | Solution design and architecture document templates |
+| `ai-coding-v6.0/.normalized/` | Distilled agent rules per role (16 roles) |
+| `ai-coding-v6.0/scripts/` | Quality gate scripts and state machine CLI |
+| `ai-coding-v6.0/templates/` | Solution design and architecture document templates |
+| `ai-coding-v6.0/lessons/` | Lessons learned registry |
 
 ## Quality Gates
 
 - Self-correction loop: max 3 rounds, then escalate to human
 - Gate Checker: independent read-only validation agent
-- Multi-pass review: 5 passes × 7 gates × 25 checks × 3 rounds = 630 review checks
+- Multi-pass review: 6 Pass × 7 Gate × 3 rounds = 630 review checks
 - Evidence chain: every claim requires ≥2 machine-verifiable evidence items from different sources
 
 ## Spec-Driven Development

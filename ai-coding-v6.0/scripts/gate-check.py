@@ -470,7 +470,7 @@ def validate_manifest(manifest):
                 candidates = [ev]
                 if ev.startswith("specs/") or ev in ("CLAUDE.md", "AGENTS.md"):
                     candidates.append(ev)
-                if ev.startswith("ai-coding-v5.4/"):
+                if ev.startswith("ai-coding-v") or ev.startswith("ai-coding/"):
                     candidates.append(ev)
                 if ev.startswith(".github/") or ev.startswith(".gate/"):
                     candidates.append(ev)

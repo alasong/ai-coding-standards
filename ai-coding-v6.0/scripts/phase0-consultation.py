@@ -10,7 +10,7 @@ from openai import OpenAI
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PHASE0_DIR = os.path.join(PROJECT_ROOT, "ipd", "phase-0")
-NORM_DIR = os.path.join(PROJECT_ROOT, "ai-coding-v5.4", ".normalized")
+NORM_DIR = os.path.join(PROJECT_ROOT, "ai-coding-v6.0", ".normalized")
 
 API_KEY = os.environ["SILICONFLOW_API_KEY"]
 API_BASE = "https://api.siliconflow.cn/v1"
