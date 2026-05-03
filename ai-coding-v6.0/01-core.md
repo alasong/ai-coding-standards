@@ -581,7 +581,16 @@ Fail → 返回 Executor 修复
 
 ## 第 10 章：Multi-Pass Review Protocol
 
-每个 IPD Phase 产出完成后，执行 **6 轮审查**，对 **7 个 Gate** 的 **25 个检查项** 逐项进行 **3 轮独立验证**：
+每个 IPD Phase 产出完成后，按流程裁剪档位执行审查：
+
+| 档位 | Pass 数 | 检查项 | 说明 |
+|------|---------|--------|------|
+| **S** | 2 Pass | P1（自审）+ P4（Gate Checker） | 自动化工具为主 |
+| **M** | 3 Pass | P1 + P4 + P5（人工） | 加人工确认 |
+| **L** | 5 Pass | P1-P5 | 全审查 |
+| **XL D1** | 6 Pass | P1-P6（+ D1 额外要求） | 见 §12 D1 要求 |
+
+**完整 Pass 定义**（仅 XL D1 执行全部）：
 
 | Pass | 名称 | 执行者 | 视角 |
 |------|------|--------|------|
@@ -592,9 +601,9 @@ Fail → 返回 Executor 修复
 | P5 | Human Reviewer | 人类 | 战略对齐 + 风险接受度 |
 | P6 | Depth Score | 独立 Agent（critic/architect） | 深度质量 |
 
-审查次数：7 Gate × ~5 检查项 × 3 轮验证 × 6 Pass = 630 次。
-
 **逃逸条件**：微小变更（≤5 行单文件）、纯格式变更、紧急 Hotfix 可跳过部分 Pass，但必须在 Gate Report 中注明原因。
+
+> **注意**：文档中的"6 Pass"是理论上限。实际项目中 90% 以上的变更只需 2-3 Pass（S/M 档）。不要以 6 Pass 为默认来规划工作量。
 
 ---
 
@@ -617,9 +626,20 @@ Fail → 返回 Executor 修复
 
 ## 第 12 章：深度评分与基线提升
 
-### 评分规则
+### 评分规则（S/M 档简化模式）
 
-每个 Phase 的 DCP 深度评分表包含 3-5 个维度，每个维度 0-3 分：
+S/M 档使用通过/不通过判定，不使用评分：
+
+| 维度 | 通过标准 |
+|------|---------|
+| 需求覆盖 | 所有需求条目有对应实现和测试 |
+| 技术合理性 | 实现方案与现有架构一致，无过度工程 |
+
+通过条件：两个维度均通过即视为 PASS。
+
+### 评分规则（L/XL 档）
+
+L/XL 档使用深度评分，每个 Phase 的 DCP 深度评分表包含 3-5 个维度，每个维度 0-3 分：
 
 | 分数 | 定义 | 说明 |
 |------|------|------|
@@ -641,7 +661,9 @@ Fail → 返回 Executor 修复
 
 级别由 Spec 的 YAML frontmatter `depth_tier` 字段声明，由 Tech Lead 在 DCP 中确认。未声明默认按 D2 执行。
 
-### 基线提升机制
+### 基线提升机制（L/XL 档）
+
+> S/M 档不使用基线提升。
 
 1. 每个 Feature 完成后，记录该 Phase 的最高得分到 `.gate/depth-baselines.json`
 2. 同一 Phase 的后续 DCP 评分不得低于已有基线
@@ -669,7 +691,7 @@ Fail → 返回 Executor 修复
 - `scored_by` 为 "self" 标记 `[DEPTH-SELF-SCORED]`，判定无效
 - 独立 Agent 评分与自评差异 ≥ 2 分时，以独立 Agent 评分为准
 
-### 深度评分异常模式检测
+### 深度评分异常模式检测（L/XL 档）
 
 | 异常模式 | 检测逻辑 | 动作 |
 |---------|---------|------|
@@ -743,7 +765,7 @@ P11 证据链 ── P12-P22 工程实践 ── P23 需求→Spec 链 ── P2
 流程裁剪：S（单文件）── M（1-3 Spec）── L（3-10 Spec）── XL（10+ Spec）
 TDD：Red → Green → Refactor
 幻觉防护：Example-Driven + Prompt Chaining + Progressive Disclosure + 两层审查
-深度评分：0 未做 → 1 表面 → 2 机制 → 3 批判。每项 ≥ 2，总分 ≥ 60%
+深度评分：S/M 通过/不通过；L/XL 0→1→2→3 分。每项 ≥ 2，总分 ≥ 60%
 特性深度：D1 核心 → D2 重要 → D3 一般 → D4 维护
-Multi-Pass：6 Pass × 7 Gate × 3 轮 = 630 次验证
+Multi-Pass：S 档 2 Pass / M 档 3 Pass / L 档 5 Pass / XL D1 6 Pass
 ```
