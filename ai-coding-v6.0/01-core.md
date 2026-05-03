@@ -655,7 +655,7 @@ Fail → 返回 Executor 修复
 | 要求 | 说明 |
 |------|------|
 | P3 对抗视角 | 必须包含"如果安全团队看这个设计，会质疑什么" |
-| P4 Gate Checker 模型 | 必须使用 sonnet 或 opus（不得用 haiku） |
+| P4 Gate Checker 模型 | 必须使用强能力模型（不得用弱能力模型） |
 | P6 深度评分 | "自身盲区识别"维度必须 ≥ 3 分 |
 | 额外产出 | `.gate/d1-risk-assessment.json`，包含 ≥3 条风险分析 |
 | Lessons 引用 | 必须引用 ≥2 条 open 教训 |

@@ -220,8 +220,8 @@ specs/F001-auth-module.md
 
 | 角色 | 模型 | 职责 |
 |------|------|------|
-| Supervisor | opus | 需求分析、任务拆分、分发、仲裁 |
-| Worker | sonnet | TDD 循环执行 |
+| Supervisor | 强 | 需求分析、任务拆分、分发、仲裁 |
+| Worker | 中 | TDD 循环执行 |
 
 流程：读取 ready Spec → 构建依赖图 → 拆分原子任务 → 按依赖分发 → 并行执行无依赖任务 → 汇总 PR → 全量测试 + 幻觉扫描 + 安全检查。
 
@@ -257,12 +257,12 @@ TeamCreate → TaskCreate → TaskUpdate(addBlockedBy) → Agent(team_name=...) 
 S3/S4 级别下，扁平的多 Agent 并行会导致上下文爆炸和语义冲突。改用分层调度：
 
 ```
-Architecture Agent (opus)
+Architecture Agent (强能力模型)
   └── 职责：维护模块间接口契约，不关心模块内部实现
         │
-        ├── Domain Agent A (sonnet) ── payment 模块，负责该模块内所有 Feature
-        ├── Domain Agent B (sonnet) ── order 模块
-        └── Domain Agent C (sonnet) ── notification 模块
+        ├── Domain Agent A (中能力模型) ── payment 模块，负责该模块内所有 Feature
+        ├── Domain Agent B (中能力模型) ── order 模块
+        └── Domain Agent C (中能力模型) ── notification 模块
 ```
 
 **分层规则**：

@@ -27,23 +27,37 @@
 
 ## 第 2 章：模型路由
 
-### 2.1 模型选择策略
+### 2.1 能力分级（模型无关）
 
-| 任务类型 | 推荐模型 | 原因 |
-|---------|---------|------|
-| 代码生成 | sonnet | 性价比高 |
-| 架构设计 | opus | 需要深度推理 |
-| 代码审查 | opus | 需要深度分析 |
-| 文件搜索 | haiku | 快速简单 |
-| 文档编写 | haiku | 结构化内容 |
-| 安全审查 | opus | 不可出错 |
+v6.0 不绑定具体模型厂商，使用能力分级描述：
 
-### 2.2 动态路由
+| 能力等级 | 定位 | 典型用途 |
+|---------|------|---------|
+| **强** | 深度推理、复杂分析、不可出错场景 | 架构设计、代码审查、安全审查、Gate Checker（D1 特性） |
+| **中** | 平衡质量与成本 | 代码生成、TDD 循环、Domain Agent 执行 |
+| **弱** | 快速简单任务、高并发场景 | 文件搜索、格式化、简单文档编写 |
 
-Director Agent 根据任务复杂度自动选择模型：
-- 简单任务（S 档）→ haiku
-- 中等任务（M 档）→ sonnet
-- 复杂/关键任务（L/XL 档）→ opus
+### 2.2 模型路由映射
+
+各平台模型按能力等级映射：
+
+| 任务类型 | 能力要求 | 百炼模型 | DeepSeek | SiliconFlow |
+|---------|---------|---------|----------|-------------|
+| 架构设计 | 强 | Qwen-Max / Qwen-Plus-Latest | deepseek-chat | Qwen2.5-Coder-32B |
+| 代码审查 | 强 | Qwen-Max | deepseek-chat | Qwen2.5-Coder-32B |
+| 安全审查 | 强 | Qwen-Max | deepseek-chat | Qwen2.5-Coder-32B |
+| Gate Checker | 强 | Qwen-Max | deepseek-chat | Qwen2.5-Coder-32B |
+| 代码生成 | 中 | Qwen-Plus | deepseek-coder | Qwen2.5-Coder-32B |
+| TDD 执行 | 中 | Qwen-Plus | deepseek-coder | Qwen2.5-Coder-32B |
+| 文件搜索 | 弱 | Qwen-Turbo | deepseek-coder-lite | 轻量模型 |
+| 文档编写 | 弱 | Qwen-Turbo | deepseek-coder-lite | 轻量模型 |
+
+### 2.3 动态路由
+
+Director Agent 根据任务复杂度自动选择能力等级：
+- 简单任务（S 档）→ 弱能力模型
+- 中等任务（M 档）→ 中能力模型
+- 复杂/关键任务（L/XL 档）→ 强能力模型
 
 ---
 
@@ -63,5 +77,5 @@ Director Agent 根据任务复杂度自动选择模型：
 
 ### 3.3 缓存利用
 
-- 利用 Anthropic prompt caching 减少重复 token 消耗
+- 利用 LLM 平台的 prompt caching 机制减少重复 token 消耗（百炼、DeepSeek、SiliconFlow 均支持 OpenAI 兼容接口的缓存）
 - 系统 prompt 保持稳定以最大化缓存命中
