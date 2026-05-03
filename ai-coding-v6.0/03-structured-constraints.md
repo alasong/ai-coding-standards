@@ -406,6 +406,153 @@ Director 生成约束文件后、启动 Agent 前必须运行：
 
 **Agent 清单**：agent_id 全局唯一 + assigned_task_ids 在编排合同中存在 + spec_rules 中所有文件存在 + tool_permissions 不冲突。
 
+### Contract Validation Gate（独立 Agent 验证）
+
+> 01-core.md §12 通用独立验证原则的应用。
+
+约束文件校验清单是**自动化检查**。Contract Validation Gate 是**独立 Agent 的结构化验证**。两者互补：自动化检查查格式，独立 Agent 查语义。
+
+**执行时机**：Director 生成所有约束文件后、启动 Executor 之前。
+
+**执行者**：与 Director 不同的 Agent 会话（不得共享对话上下文）。
+
+**检查项**：
+
+| # | 检查项 | 方法 | 失败标记 |
+|---|--------|------|---------|
+| 1 | 任务合同是否完整覆盖 Spec 验收标准 | 逐项对比 `spec_acceptance_criteria` 与 Spec 的 AC | `[CONTRACT-AC-MISSING]` |
+| 2 | dependency_graph 的依赖关系是否合理 | 检查 input_files 是否真的是 output_files 的前置依赖 | `[CONTRACT-DEP-INVALID]` |
+| 3 | 边界约束是否覆盖所有可能的修改路径 | 检查 `boundary_constraints` 是否遗漏了 Spec 要求的修改范围 | `[CONTRACT-BOUNDARY-GAP]` |
+| 4 | 任务合同之间是否存在隐性冲突 | 检查多个任务的 output_files 是否有重叠 | `[CONTRACT-CONFLICT]` |
+| 5 | Agent 能力是否与任务匹配 | 检查 Agent Manifest 的 `capabilities` 是否覆盖任务要求 | `[CONTRACT-CAPABILITY-MISMATCH]` |
+| 6 | 编排合同的历史失败模式是否被考虑 | 读取 `.gate/learning/` 中的历史模式，检查是否注入约束 | `[CONTRACT-LEARNING-MISSING]` |
+
+**输出**：`.gate/contract-validation-{session-id}.json`
+
+```json
+{
+  "session_id": "sess-20260502-001",
+  "validated_by": "independent validator",
+  "status": "pass" | "fail",
+  "findings": [
+    {
+      "check_id": 1,
+      "status": "fail",
+      "finding": "AC-003 没有对应的任务合同",
+      "severity": "critical"
+    }
+  ]
+}
+```
+
+**裁决**：
+- 所有检查 PASS → 启动 Executor
+- 存在 `critical` 级发现 → Director 必须修复后重新验证
+- 存在 `warning` 级发现 → 记录到 Gate 报告，允许启动
+
+**不可裁剪**：Contract Validation Gate 在任何流程档位（S/M/L/XL）都必须执行。S 档可跳过第 2/4 项（简单任务无复杂依赖），但第 1/3/5/6 项必须执行。
+
+---
+
+## 附录 B：自动学习机制
+
+> 从 Gate 失败中自动学习，避免重复犯错。01-core.md P11（证据链）原则的执行。
+
+### B.1 失败模式分类
+
+Gate Checker 在每个 `gate-{task-id}.json` 中增加 `failure_patterns` 字段：
+
+```json
+{
+  "task_id": "T002",
+  "status": "fail",
+  "failure_patterns": {
+    "category": "boundary_violation",
+    "subcategory": "file_outside_scope",
+    "severity": "critical",
+    "detail": "修改了 internal/config/ 下的文件，但该文件不在 boundary_constraints 中",
+    "root_cause_hypothesis": "任务合同未声明 config 文件需要修改",
+    "spec_id": "F001",
+    "task_type": "auth_implementation",
+    "module": "payment-service"
+  }
+}
+```
+
+失败类别：
+
+| 类别 | 说明 | 自动修正动作 |
+|------|------|------------|
+| `boundary_violation` | Executor 修改了边界外文件 | 注入到 Director 约束：下次同类任务必须包含此文件 |
+| `ac_not_covered` | 验收标准未被测试覆盖 | 注入到 Director 约束：下次必须为 AC 生成对应测试 |
+| `spec_misunderstood` | Executor 误解了 Spec 意图 | 注入到 Spec 质量审查队列 |
+| `dependency_missing` | 遗漏了必要的依赖文件 | 注入到 Director 约束：下次必须读取此文件 |
+| `nfr_violated` | 非功能需求未满足 | 注入到任务合同的 nfr 检查清单 |
+| `contract_ambiguous` | 任务合同描述有歧义 | 注入到 Director 的模板改进记录 |
+
+### B.2 学习触发规则
+
+| 触发条件 | 动作 | 影响范围 |
+|---------|------|---------|
+| 相同 `failure_pattern.category` + `task_type` 出现 ≥ 2 次 | 自动注入到下一次同类型任务的编排合同约束中 | 同任务类型 |
+| 相同 `spec_id` 连续 ≥ 2 次 Gate 失败 | 触发 Spec 质量审查（可能 Spec 本身有问题） | 该 Spec |
+| 相同 `module` 连续 ≥ 3 次 Gate 失败 | 触发模块级架构审查 | 该模块 |
+| 全局 Gate 失败率 > 30%（滚动 10 个任务） | 触发流程健康度审查（可能是流程档位选择不当） | 全局 |
+
+### B.3 学习存储
+
+失败模式存储到 `.gate/learning/` 目录：
+
+```
+.gate/learning/
+├── failure-log.json           # 所有失败记录
+├── pattern-index.json         # 按 task_type 索引的失败模式
+└── injected-constraints.json  # 已注入到编排合同的约束
+```
+
+`pattern-index.json` 格式：
+
+```json
+{
+  "auth_implementation": {
+    "count": 5,
+    "patterns": {
+      "boundary_violation": {
+        "count": 3,
+        "last_seen": "2026-05-02",
+        "injected_constraint": "必须包含 internal/config/ 下的配置文件"
+      }
+    }
+  }
+}
+```
+
+### B.4 Director 启动时的学习注入
+
+Director 生成编排合同前必须读取 `.gate/learning/pattern-index.json`：
+
+1. 匹配本次任务的 `task_type` 和 `module`
+2. 提取该类型的高频失败模式（出现 ≥ 2 次）
+3. 将对应的 `injected_constraint` 写入编排合同的 `learning_constraints` 字段
+4. 记录到 `.gate/learning/injected-constraints.json`
+
+```yaml
+# 编排合同中新增字段
+orchestration:
+  learning_constraints:
+    - source_pattern: "boundary_violation in auth_implementation"
+      constraint: "任务合同必须显式声明 internal/config/ 下的文件是否需要修改"
+      severity: critical
+```
+
+### B.5 学习的生命周期
+
+| 事件 | 动作 |
+|------|------|
+| 约束注入后，同类型任务连续 5 次未触发相同失败 | 标记约束为 `satisfied`（保留但不强制） |
+| 约束注入后，同类型任务仍然失败 | 升级为 `critical`，触发人工审查 |
+| 约束超过 30 天未被触发 | 归档到历史，不再注入 |
+
 ---
 
 ## 第 8 章：Contract 文件（S3/S4 结构化契约）
