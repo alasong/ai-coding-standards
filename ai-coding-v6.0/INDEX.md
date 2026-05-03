@@ -12,7 +12,7 @@
 | 优先级 | 文档 | 内容 |
 |--------|------|------|
 | **P0** | [00-philosophy.md](00-philosophy.md) | 元规则：为什么存在、追求什么 |
-| **P0** | [01-core.md](01-core.md) | P1-P24 原则、L1-L4 自治等级、TDD、Spec 驱动、幻觉防护 |
+| **P0** | [01-core.md](01-core.md) | P1-P24 原则、L1-L4 自治等级、流程裁剪、Scale 适配、TDD、Spec 驱动、幻觉防护 |
 | **P0** | [02-state-machine.md](02-state-machine.md) | IPD 宏状态 + SCFS 微状态、YAML 配置、CLI |
 | **P1** | [03-structured-constraints.md](03-structured-constraints.md) | 6 种约束文件、Agent 生命周期、升级协议 |
 | **P1** | [04-multi-agent.md](04-multi-agent.md) | Agent 角色、会诊模式、团队矩阵、冲突解决 |

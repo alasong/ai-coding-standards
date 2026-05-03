@@ -308,19 +308,52 @@ python scripts/ipd-sm.py next            # 转换到下一个状态
 python scripts/ipd-sm.py reset STATE     # 重置状态（人工）
 python scripts/ipd-sm.py history         # 查看历史
 python scripts/ipd-sm.py init            # 初始化 .ipd/ 目录
+
+# Scale 模式（S3/S4：千万级代码库）
+python scripts/ipd-sm.py scope           # 计算变更影响域
 ```
 
 ---
 
-## 第 7 章：与现有体系的映射
+## 第 7 章：变更定界（Scale 适配）
+
+> S3/S4 级别代码库的自动化依赖分析。详见 [01-core.md §4.3](01-core.md#43-变更定界scope-bounding)
+
+在千万级代码库上，IPD 状态机转换前必须执行变更定界，确保 Agent 上下文窗口不被撑爆。
+
+### 8.1 定界流程
+
+```
+变更请求 → 依赖图谱扫描 → 计算影响域 → 决定档位(S/M/L/XL) → 状态机转换
+```
+
+依赖图谱扫描：
+1. 识别直接变更的文件
+2. 通过 import/require 关系构建直接依赖列表
+3. 通过调用链构建间接依赖列表
+4. 输出影响域报告到 `.ipd/scope-{date}.json`
+
+### 8.2 影响域判定
+
+| 影响域范围 | 自动档位 | Agent 上下文 |
+|-----------|---------|-------------|
+| ≤ 3 个文件，单模块 | S | 全部相关文件 |
+| ≤ 10 个文件，≤ 2 个模块 | M | 模块级文件 |
+| > 10 个文件或 > 2 个模块 | L | Contract 文件 + 接口契约 |
+| 跨服务/平台级 | XL | 只加载直接变更区 + CI 验证 |
+```
+
+---
+
+## 第 8 章：与现有体系的映射
 
 | 规范概念 | 定义位置 | 状态机实现 |
 |---------|---------|-----------|
 | P23 需求→Spec 链 | [01-core.md](01-core.md) §1 | PHASE_1 → PHASE_2 → PHASE_2.5 |
-| DCP Gate | [01-core.md](01-core.md) §4 | exit_condition: dcp_checklist |
-| P3 TDD | [01-core.md](01-core.md) §5 | TDD_RED → TDD_GREEN → TDD_REFACTOR |
-| P7 Spec 驱动 | [01-core.md](01-core.md) §6 | PHASE_3_DISPATCH enter 需 Spec ready |
-| Self-Correction ≤ 3 | [01-core.md](01-core.md) §5 | TASK_GATE 计数器 |
+| DCP Gate | [01-core.md](01-core.md) §5 | exit_condition: dcp_checklist |
+| P3 TDD | [01-core.md](01-core.md) §6 | TDD_RED → TDD_GREEN → TDD_REFACTOR |
+| P7 Spec 驱动 | [01-core.md](01-core.md) §7 | PHASE_3_DISPATCH enter 需 Spec ready |
+| Self-Correction ≤ 3 | [01-core.md](01-core.md) §6 | TASK_GATE 计数器 |
 | SCFS 结构化约束 | [03-structured-constraints.md](03-structured-constraints.md) | SCFS_BOOT → ... → SCFS_WAITING |
 | SCFS 边界验证 | [03-structured-constraints.md](03-structured-constraints.md) §5 | TASK_GATE: scfs_boundary_check |
 

@@ -405,3 +405,57 @@ Director 生成约束文件后、启动 Agent 前必须运行：
 **任务合同**：task_id 在编排合同中存在 + input_files 中所有文件存在 + output_files 路径不冲突 + self_check_list 覆盖所有约束。
 
 **Agent 清单**：agent_id 全局唯一 + assigned_task_ids 在编排合同中存在 + spec_rules 中所有文件存在 + tool_permissions 不冲突。
+
+---
+
+## 第 8 章：Contract 文件（S3/S4 结构化契约）
+
+> S3（100-1000 万行）和 S4（>1000 万行）级别下，Contract 文件替代 markdown Spec 作为 P7 的执行载体。
+
+详见 [01-core.md §4.4](01-core.md#44-结构化契约contract-file)
+
+### 5.1 Contract 文件结构
+
+```yaml
+# .contracts/payment-service/F042-refund.yaml
+contract:
+  id: F042
+  module: payment-service
+  change_type: api_addition          # api_addition | api_modification | internal_change
+  api: POST /v2/refund
+  backward_compatible: true
+  input_schema:
+    order_id: string
+    reason: string
+  output_schema:
+    refund_id: string
+    status: string
+  affected_modules: [order-service, notification-service]
+  test_scope:
+    - payment/refund_test.go
+    - order/refund_integration_test.go
+  nfr:
+    latency_p99: 200ms
+    error_budget: 0.01%
+  dcp_phase: M
+  status: ready
+```
+
+### 5.2 Contract 与 Spec 的关系
+
+| 维度 | Spec 文件（S1/S2） | Contract 文件（S3/S4） |
+|------|-------------------|----------------------|
+| 格式 | markdown | YAML |
+| 可读性 | 人类友好 | 机器友好 |
+| 位置 | `specs/F{NNN}-{name}.md` | `.contracts/{module}/F{NNN}.yaml` |
+| 验证 | Spec Validation Gate | 自动化契约验证 |
+| 依赖追踪 | 手动 | 依赖图谱自动构建 |
+
+### 5.3 Contract 验证规则
+
+Contract 文件在 Phase 2→3 转换时生成，必须通过以下验证：
+1. `id` 在 Spec 列表中存在对应的 Spec 文件
+2. `module` 是已定义的模块名
+3. `affected_modules` 中的每个模块存在对应的 Contract 目录
+4. `input_schema` 和 `output_schema` 是有效的 JSON Schema 子集
+5. `test_scope` 中至少有一个文件路径（不要求文件已存在，但路径必须合理）

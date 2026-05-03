@@ -251,3 +251,31 @@ TeamCreate → TaskCreate → TaskUpdate(addBlockedBy) → Agent(team_name=...) 
 | Cloud | 云端定时任务，关机也可运行 |
 
 阻塞事件通过 Slack/Telegram/webhook 发送告警。完成报告自动生成。
+
+### 8.6 分层 Agent 调度（S3/S4 专用）
+
+S3/S4 级别下，扁平的多 Agent 并行会导致上下文爆炸和语义冲突。改用分层调度：
+
+```
+Architecture Agent (opus)
+  └── 职责：维护模块间接口契约，不关心模块内部实现
+        │
+        ├── Domain Agent A (sonnet) ── payment 模块，负责该模块内所有 Feature
+        ├── Domain Agent B (sonnet) ── order 模块
+        └── Domain Agent C (sonnet) ── notification 模块
+```
+
+**分层规则**：
+1. **Architecture Agent**：只读取和修改 `.contracts/` 目录下的 Contract 文件，不得读取模块实现代码
+2. **Domain Agent**：只读取和修改自己负责的模块代码，通过 Contract 文件了解上游/下游接口约束
+3. **跨模块变更**：Domain Agent 发现需要修改其他模块时，通过 Escalation Protocol（见 [03-structured-constraints.md](03-structured-constraints.md) §4）请求 Architecture Agent 协调
+4. **Gate Checker**：分层架构下，每个 Domain Agent 有独立的 Gate Checker，Architecture Agent 有全局 Gate Checker
+
+**对比会诊模式**：
+
+| 维度 | 会诊模式（S1/S2） | 分层调度（S3/S4） |
+|------|-----------------|-----------------|
+| Agent 数量 | 3-5 个/Feature | N 个 Domain Agent + 1 个 Architecture Agent |
+| 上下文范围 | 全部代码 | 单个模块 |
+| 冲突检测 | Gate Checker 人工判断 | Contract 文件自动验证接口兼容性 |
+| 适用场景 | 单 Feature 开发 | 多 Feature 并行开发 |
